@@ -29,3 +29,151 @@ This repository is not a new ATAC distribution. It is a porting and reproducibil
 - `PORTING_NOTES.md`: chronological notes of commands, failures, changes, and validation.
 - `patches/`: optional exported patches.
 - `logs/`: selected configure/build/test logs.
+
+# Installation Guide on Fedora Linux 42 (Workstation) Linux 6.19.14-100.fc42.x86_64
+
+## Overview
+
+This document provides instructions for compiling and installing ATAC from source on a modern 64-bit Linux environment. Due to the legacy nature of the codebase, specific compiler flags and dependency management are required to ensure compatibility with modern GCC standards.
+
+---
+
+## Prerequisites
+
+### System Dependencies
+
+Ensure your system has the following development tools and libraries installed:
+
+```bash
+# For Fedora/RHEL/CentOS
+sudo dnf group install "Development Tools"
+sudo dnf install ncurses-devel bison byacc glibc-devel.i686
+```
+
+---
+
+## Build Instructions
+
+### 1. Environment Configuration
+
+To maintain compatibility with modern GCC (which treats legacy C patterns as errors), you must relax the compiler strictness and define the installation prefix.
+
+```bash
+export CFLAGS="-O2 -Wno-implicit-function-declaration -Wno-int-conversion -std=gnu89"
+export LIBS="-lncurses"
+```
+
+### 2. Configure the Build
+
+From the `upstream` directory, run the configuration script. We redirect logs to a dedicated folder for troubleshooting.
+
+```bash
+mkdir -p ../logs
+./configure --prefix="$PWD/_install" 2>&1 | tee ../logs/configure.txt
+```
+
+### 3. Compile the Source
+
+Execute the build using `make`.
+
+```bash
+make 2>&1 | tee ../logs/make.txt
+```
+
+---
+
+## Installation
+
+### Manual Deployment
+
+Due to strictness in the legacy installation script's feature tests, a manual installation is recommended to ensure all binaries are correctly placed:
+
+```bash
+# Create target directories
+mkdir -p _install/bin
+mkdir -p _install/lib/atac
+
+# Deploy binaries
+cp atacysis/atacysis _install/bin/atac
+cp tools/hili _install/bin/
+cp atac_cpp/atac_cpp _install/bin/
+cp Version _install/lib/atac/
+```
+
+---
+
+## Post-Installation Setup
+
+### Environment Variables
+
+To use ATAC commands globally, add the bin directory to your `PATH`. Add the following line to your `~/.bashrc` file:
+
+```bash
+export PATH="$PATH:/path/to/your/atac-linux/upstream/_install/bin"
+```
+
+Apply the changes:
+
+```bash
+source ~/.bashrc
+```
+
+### Verification
+
+Verify the installation by checking the command usage:
+
+```bash
+atac
+```
+
+or
+
+## Version Identification
+
+### 1. Verification of Build Version
+
+The version information is stored in a dedicated metadata file during the build process. You can verify the installed version by reading the `Version` file in the library directory:
+
+```bash
+cat _install/lib/atac/Version
+```
+
+### 2. Binary Metadata Check
+
+To ensure the binaries were compiled correctly for your current architecture, use the `file` command:
+
+```bash
+file _install/bin/atac
+```
+
+_Expected Output:_ `ELF 64-bit LSB executable, x86-64, version 1 (SYSV)...`
+
+### 3. Usage Signature
+
+Since this legacy build may not respond to the modern `--version` flag, the presence of the full usage menu serves as the primary confirmation that the tool is operational:
+
+```bash
+# Triggers the usage menu and confirms binary execution
+atac
+```
+
+---
+
+## Technical Specifications (Automated Detection)
+
+During the `./configure` phase, the system identifies the following environment characteristics. These are recorded in `config.h` for reference:
+
+| Parameter            | Detected Value           |
+| :------------------- | :----------------------- |
+| **System Type**      | x86_64-unknown-linux-gnu |
+| **Compiler**         | GCC 15.2.1 (Strict Mode) |
+| **Integer Size**     | 32-bit (Internal Type)   |
+| **Long Size**        | 64-bit (Internal Type)   |
+| **Binary Interface** | ncurses/terminfo         |
+
+---
+
+## Troubleshooting
+
+- **Missing ncurses**: If the linker fails with `undefined reference to vidattr`, ensure `LIBS="-lncurses"` is exported during configuration.
+- **Type Size Warnings**: On 64-bit systems, `config.h` may report sizes in bits (e.g., `INT_TYPE_SIZE 32`). This is expected behavior for this legacy codebase and does not prevent functionality.
