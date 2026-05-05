@@ -106,7 +106,7 @@ atac_rt.o:	atac_rt.c $(INCLUDES)/portable.h
 hili.o:		hili.c $(INCLUDES)/portable.h
 
 hili:		hili.o
-		$(LINK) $(CFLAGS) hili.o  -o $@
+		$(LINK) $(CFLAGS) hili.o -ltermcap -lcurses  -o $@
 
 min.o:		$(INCLUDES)/portable.h
 

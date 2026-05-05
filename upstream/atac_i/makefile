@@ -127,7 +127,7 @@ INCLUDES	= ..
 CPPFLAGS	=  -D_GNU_SOURCE -I. -I$(INCLUDES) -I$(srcdir)/.. -I$(srcdir) -DHAVE_CONFIG_H
 CFLAGS		= -O2 
 
-YACC		= yacc
+YACC		= bison -y
 
 OBJ=		atac_i.o	\
 		fg_module.o	\

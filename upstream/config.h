@@ -17,10 +17,13 @@
 #define HAVE_SYS_TIME_H 1
 #define HAVE_SYS_TYPES_H 1
 #define HAVE_SYS_WAIT_H 1
+#define HAVE_TERMCAP_H 1
+#define HAVE_TERM_H 1
 #define HAVE_TIME_H 1
 #define HAVE_UNISTD_H 1
 #define HAVE_VFPRINTF 1
 #define M_TERMINFO 1
+#define NEED_TERM_H 1
 #define OUTC_RETURN 1
 #define RETSIGTYPE int
 #define STDC_HEADERS 1

@@ -88,7 +88,7 @@ srcdir          = .
 
 CC		= gcc
 CPP		= gcc -E
-YACC		= yacc
+YACC		= bison -y
 INCLUDES	= ..
 CPPFLAGS	=  -D_GNU_SOURCE -I. -I$(INCLUDES) -I$(srcdir)/.. -I$(srcdir) -DHAVE_CONFIG_H -DATAC_MODS
 CFLAGS		= -O2 

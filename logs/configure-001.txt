@@ -14,8 +14,7 @@ checking for gcc option to accept ANSI C... none needed
 checking $CC variable... ok
 checking for a BSD compatible install... /usr/bin/install -c
 checking whether make sets ${MAKE}... yes
-checking for bison... no
-checking for byacc... no
+checking for bison... bison -y
 checking for an ANSI C-conforming const... yes
 checking if we must define _GNU_SOURCE... yes
 checking if _XOPEN_SOURCE really is set... yes
@@ -38,9 +37,9 @@ yes
 checking for sys/wait.h... egrep: warning: egrep is obsolescent; using grep -E
 yes
 checking for term.h... egrep: warning: egrep is obsolescent; using grep -E
-no
+yes
 checking for termcap.h... egrep: warning: egrep is obsolescent; using grep -E
-no
+yes
 checking for time.h... egrep: warning: egrep is obsolescent; using grep -E
 yes
 checking for unistd.h... egrep: warning: egrep is obsolescent; using grep -E
@@ -59,11 +58,10 @@ checking for tigetstr in -ltermlib... no
 checking for tgetstr in -ltermlib... no
 checking for tigetstr in -ltermcap... no
 checking for tgetstr in -ltermcap... no
-checking for initscr in -lcurses... no
-checking for tgoto in -ltermcap... no
-configure: WARNING: Cannot find -ltermlib, -lcurses, or -ltermcap
-checking for term.h... no
-checking if we should include curses.h or termcap.h... no
+checking for initscr in -lcurses... yes
+checking for tgoto in -ltermcap... yes
+checking for term.h... term.h
+checking if we should include curses.h or termcap.h... term.h
 checking declaration of tputs 3rd param... int OutChar(int)
 ./configure: line 6638: test: =: unary operator expected
 checking for sys/types.h... yes
@@ -125,4 +123,3 @@ fgrep: warning: fgrep is obsolescent; using grep -F
 egrep: warning: egrep is obsolescent; using grep -E
 egrep: warning: egrep is obsolescent; using grep -E
 config.status: creating config.h
-config.status: config.h is unchanged

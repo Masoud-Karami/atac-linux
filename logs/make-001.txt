@@ -1,0 +1,137 @@
+cd atac_i; make
+make[1]: Entering directory '/home/hpc/atac-linux/upstream/atac_i'
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./atac_i.c
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./fg_module.c
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./fg_stmt.c
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./fg_expr.c
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./dug.c
+./dug.c: In function ‘dug_create’:
+./dug.c:148:26: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  148 | #define DUG_MAGIC       ((int)dug_create)       /* unlikely number */
+      |                          ^
+./dug.c:158:18: note: in expansion of macro ‘DUG_MAGIC’
+  158 |     dug->magic = DUG_MAGIC;
+      |                  ^~~~~~~~~
+./dug.c: In function ‘dug_newblk’:
+./dug.c:148:26: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  148 | #define DUG_MAGIC       ((int)dug_create)       /* unlikely number */
+      |                          ^
+./dug.c:213:16: note: in expansion of macro ‘DUG_MAGIC’
+  213 |     b->magic = DUG_MAGIC;
+      |                ^~~~~~~~~
+./dug.c: In function ‘dug_branch’:
+./dug.c:148:26: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  148 | #define DUG_MAGIC       ((int)dug_create)       /* unlikely number */
+      |                          ^
+./dug.c:149:26: note: in expansion of macro ‘DUG_MAGIC’
+  149 | #define BRANCH_MAGIC    (DUG_MAGIC + 1)
+      |                          ^~~~~~~~~
+./dug.c:332:16: note: in expansion of macro ‘BRANCH_MAGIC’
+  332 |     r->magic = BRANCH_MAGIC;
+      |                ^~~~~~~~~~~~
+./dug.c: In function ‘branch_print’:
+./dug.c:148:26: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  148 | #define DUG_MAGIC       ((int)dug_create)       /* unlikely number */
+      |                          ^
+./dug.c:149:26: note: in expansion of macro ‘DUG_MAGIC’
+  149 | #define BRANCH_MAGIC    (DUG_MAGIC + 1)
+      |                          ^~~~~~~~~
+./dug.c:429:21: note: in expansion of macro ‘BRANCH_MAGIC’
+  429 |     if (r->magic != BRANCH_MAGIC)
+      |                     ^~~~~~~~~~~~
+./dug.c: In function ‘block_dump’:
+./dug.c:148:26: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  148 | #define DUG_MAGIC       ((int)dug_create)       /* unlikely number */
+      |                          ^
+./dug.c:492:21: note: in expansion of macro ‘DUG_MAGIC’
+  492 |     if (b->magic != DUG_MAGIC)
+      |                     ^~~~~~~~~
+./dug.c: In function ‘dug_dump’:
+./dug.c:148:26: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  148 | #define DUG_MAGIC       ((int)dug_create)       /* unlikely number */
+      |                          ^
+./dug.c:511:23: note: in expansion of macro ‘DUG_MAGIC’
+  511 |     if (dug->magic != DUG_MAGIC)
+      |                       ^~~~~~~~~
+In file included from ./dug.c:126:
+./dug.c: In function ‘du_use_type’:
+./dug.h:100:20: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  100 | #define VAR_ID(s) ((int)(s) - 1)
+      |                    ^
+./dug.c:1007:28: note: in expansion of macro ‘VAR_ID’
+ 1007 |         if ((du->var_id == VAR_ID(symbol)) &&
+      |                            ^~~~~~
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./paths.c
+In file included from ./paths.c:114:
+./paths.c: In function ‘u_traverse’:
+./dug.h:99:20: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+   99 | #define ID_SYM(v) ((SYM *)((v) + 1))
+      |                    ^
+./paths.c:228:32: note: in expansion of macro ‘ID_SYM’
+  228 |         print_dupath(VAR_PUSE, ID_SYM(def->var_id), d_node, branch,
+      |                                ^~~~~~
+./dug.h:99:20: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+   99 | #define ID_SYM(v) ((SYM *)((v) + 1))
+      |                    ^
+./paths.c:238:40: note: in expansion of macro ‘ID_SYM’
+  238 |     use = du_use_type(dug, branch->to, ID_SYM(def->var_id), def->ref_type);
+      |                                        ^~~~~~
+./dug.h:99:20: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+   99 | #define ID_SYM(v) ((SYM *)((v) + 1))
+      |                    ^
+./paths.c:251:32: note: in expansion of macro ‘ID_SYM’
+  251 |         print_dupath(VAR_CUSE, ID_SYM(def->var_id), d_node, branch,
+      |                                ^~~~~~
+./paths.c: In function ‘print_dupath’:
+./dug.h:100:20: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  100 | #define VAR_ID(s) ((int)(s) - 1)
+      |                    ^
+./paths.c:288:40: note: in expansion of macro ‘VAR_ID’
+  288 |         fprintf(outfile, "C %d %d %d", VAR_ID(sym),
+      |                                        ^~~~~~
+./dug.h:100:20: warning: cast from pointer to integer of different size [-Wpointer-to-int-cast]
+  100 | #define VAR_ID(s) ((int)(s) - 1)
+      |                    ^
+./paths.c:296:43: note: in expansion of macro ‘VAR_ID’
+  296 |         fprintf(outfile, "P %d %d %d %d", VAR_ID(sym),
+      |                                           ^~~~~~
+./paths.c: In function ‘uCount’:
+./dug.h:99:20: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+   99 | #define ID_SYM(v) ((SYM *)((v) + 1))
+      |                    ^
+./paths.c:509:40: note: in expansion of macro ‘ID_SYM’
+  509 |     use = du_use_type(dug, branch->to, ID_SYM(def->var_id), def->ref_type);
+      |                                        ^~~~~~
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./mark.c
+./mark.c: In function ‘dug_mark’:
+./mark.c:383:1: warning: old-style function definition [-Wold-style-definition]
+  383 | dug_mark(dug)
+      | ^~~~~~~~
+./mark.c: In function ‘tempvar’:
+./mark.c:431:1: warning: old-style function definition [-Wold-style-definition]
+  431 | tempvar(local_pos, stmt_no, n)
+      | ^~~~~~~
+./mark.c: In function ‘marker’:
+./mark.c:525:1: warning: old-style function definition [-Wold-style-definition]
+  525 | marker(node, mtype, blkno, type, tempno)
+      | ^~~~~~
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./allpaths.c
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./alldu.c
+In file included from ./alldu.c:81:
+./alldu.c: In function ‘paths_from’:
+./dug.h:99:20: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+   99 | #define ID_SYM(v) ((SYM *)((v) + 1))
+      |                    ^
+./alldu.c:145:23: note: in expansion of macro ‘ID_SYM’
+  145 |         definfo.sym = ID_SYM(du->var_id);
+      |                       ^~~~~~
+gcc -D_GNU_SOURCE -I. -I.. -I./.. -I. -DHAVE_CONFIG_H -O2  -c ./srcpos.c
+./srcpos.c: In function ‘node_srcpos’:
+./srcpos.c:112:1: warning: old-style function definition [-Wold-style-definition]
+  112 | node_srcpos(node, left, f)
+      | ^~~~~~~~~~~
+yacc -d ./Pgram.y
+make[1]: yacc: No such file or directory
+make[1]: *** [makefile:209: Pgram.h] Error 127
+make[1]: Leaving directory '/home/hpc/atac-linux/upstream/atac_i'
+make: *** [makefile:173: ATAC_I] Error 2

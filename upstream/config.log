@@ -128,9 +128,8 @@ configure:2110: result: /usr/bin/install -c
 configure:2121: checking whether make sets ${MAKE}
 configure:2141: result: yes
 configure:2154: checking for bison
-configure:2180: result: no
-configure:2154: checking for byacc
-configure:2180: result: no
+configure:2169: found /usr/bin/bison
+configure:2177: result: bison -y
 configure:2188: checking for an ANSI C-conforming const
 configure:2252: gcc -c -g -O2  conftest.c >&5
 configure:2255: $? = 0
@@ -257,28 +256,12 @@ configure:3862: $? = 0
 configure:3881: result: yes
 configure:3846: checking for term.h
 configure:3856: gcc -E  -D_GNU_SOURCE conftest.c
-configure:3853:10: fatal error: term.h: No such file or directory
- 3853 | #include "confdefs.h"
-      |          ^~~~~~~~
-compilation terminated.
-configure:3862: $? = 1
-configure: failed program was:
-#line 3852 "configure"
-#include "confdefs.h"
-#include <term.h>
-configure:3881: result: no
+configure:3862: $? = 0
+configure:3881: result: yes
 configure:3846: checking for termcap.h
 configure:3856: gcc -E  -D_GNU_SOURCE conftest.c
-configure:3853:10: fatal error: termcap.h: No such file or directory
- 3853 | #include "confdefs.h"
-      |          ^~~~~~~~~~~
-compilation terminated.
-configure:3862: $? = 1
-configure: failed program was:
-#line 3852 "configure"
-#include "confdefs.h"
-#include <termcap.h>
-configure:3881: result: no
+configure:3862: $? = 0
+configure:3881: result: yes
 configure:3846: checking for time.h
 configure:3856: gcc -E  -D_GNU_SOURCE conftest.c
 configure:3862: $? = 0
@@ -518,167 +501,33 @@ int x=tgetstr("")
 configure:6127: result: no
 configure:6144: checking for initscr in -lcurses
 configure:6171: gcc -o conftest -g -O2  -D_GNU_SOURCE  conftest.c -lcurses   >&5
-/usr/bin/ld: cannot find -lcurses: No such file or directory
-collect2: error: ld returned 1 exit status
-configure:6174: $? = 1
-configure: failed program was:
-#line 6152 "configure"
-#include "confdefs.h"
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char initscr ();
-int
-main ()
-{
-initscr ();
-  ;
-  return 0;
-}
-configure:6191: result: no
+configure:6174: $? = 0
+configure:6177: test -s conftest
+configure:6180: $? = 0
+configure:6191: result: yes
 configure:6197: checking for tgoto in -ltermcap
-configure:6224: gcc -o conftest -g -O2  -D_GNU_SOURCE  conftest.c -ltermcap   >&5
-/usr/bin/ld: cannot find -ltermcap: No such file or directory
-collect2: error: ld returned 1 exit status
-configure:6227: $? = 1
-configure: failed program was:
-#line 6205 "configure"
-#include "confdefs.h"
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char tgoto ();
-int
-main ()
-{
-tgoto ();
-  ;
-  return 0;
-}
-configure:6244: result: no
-configure:6255: WARNING: Cannot find -ltermlib, -lcurses, or -ltermcap
+configure:6224: gcc -o conftest -g -O2  -D_GNU_SOURCE  conftest.c -ltermcap  -lcurses  >&5
+configure:6227: $? = 0
+configure:6230: test -s conftest
+configure:6233: $? = 0
+configure:6244: result: yes
 configure:6266: checking for term.h
 configure:6301: gcc -c -g -O2  -D_GNU_SOURCE conftest.c >&5
-configure:6289:10: fatal error: curses.h: No such file or directory
- 6289 | 
-      |          ^         
-compilation terminated.
-configure:6304: $? = 1
-configure: failed program was:
-#line 6287 "configure"
-#include "confdefs.h"
-
-#include <curses.h>
-#include <term.h>
-int
-main ()
-{
-WINDOW *x
-  ;
-  return 0;
-}
-configure:6301: gcc -c -g -O2  -D_GNU_SOURCE conftest.c >&5
-configure:6289:10: fatal error: curses.h: No such file or directory
- 6289 | 
-      |          ^         
-compilation terminated.
-configure:6304: $? = 1
-configure: failed program was:
-#line 6287 "configure"
-#include "confdefs.h"
-
-#include <curses.h>
-#include <ncurses/term.h>
-int
-main ()
-{
-WINDOW *x
-  ;
-  return 0;
-}
-configure:6301: gcc -c -g -O2  -D_GNU_SOURCE conftest.c >&5
-configure:6289:10: fatal error: curses.h: No such file or directory
- 6289 | 
-      |          ^         
-compilation terminated.
-configure:6304: $? = 1
-configure: failed program was:
-#line 6287 "configure"
-#include "confdefs.h"
-
-#include <curses.h>
-#include <ncursesw/term.h>
-int
-main ()
-{
-WINDOW *x
-  ;
-  return 0;
-}
-configure:6347: gcc -c -g -O2  -D_GNU_SOURCE conftest.c >&5
-configure:6331:10: fatal error: curses.h: No such file or directory
- 6331 | 
-      |          ^         
-compilation terminated.
-configure:6350: $? = 1
-configure: failed program was:
-#line 6329 "configure"
-#include "confdefs.h"
-
-#include <curses.h>
-#ifdef NCURSES_VERSION
-#include <ncurses/term.h>
-#else
-make an error
-#endif
-int
-main ()
-{
-WINDOW *x
-  ;
-  return 0;
-}
-configure:6347: gcc -c -g -O2  -D_GNU_SOURCE conftest.c >&5
-configure:6331:10: fatal error: curses.h: No such file or directory
- 6331 | 
-      |          ^         
-compilation terminated.
-configure:6350: $? = 1
-configure: failed program was:
-#line 6329 "configure"
-#include "confdefs.h"
-
-#include <curses.h>
-#ifdef NCURSES_VERSION
-#include <ncursesw/term.h>
-#else
-make an error
-#endif
-int
-main ()
-{
-WINDOW *x
-  ;
-  return 0;
-}
-configure:6371: result: no
+configure:6304: $? = 0
+configure:6307: test -s conftest.o
+configure:6310: $? = 0
+configure:6371: result: term.h
 configure:6398: checking if we should include curses.h or termcap.h
-configure:6430: gcc -o conftest -g -O2  -D_GNU_SOURCE -I.  conftest.c  >&5
+configure:6430: gcc -o conftest -g -O2  -D_GNU_SOURCE -I.  conftest.c -ltermcap -lcurses  >&5
 configure: In function 'main':
-configure:6423:19: error: implicit declaration of function 'tgoto' [-Wimplicit-function-declaration]
+configure:6423:19: error: too few arguments to function 'tgoto'; expected 3, have 1
  6423 | {
       |                   ^    
-configure:6423:11: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
- 6423 | {
-      |           ^
+In file included from ./atacterm.h:18,
+                 from configure:6419:
+/usr/include/term.h:851:31: note: declared here
+  851 | extern NCURSES_EXPORT(char *) tgoto (const char *, int, int);
+      |                               ^~~~~
 configure:6433: $? = 1
 configure: failed program was:
 #line 6417 "configure"
@@ -693,147 +542,39 @@ char *x = (char *)tgoto("")
   return 0;
 }
 Recompiling with corrected call (C:, T:)
-configure:6464: gcc -o conftest -g -O2  -D_GNU_SOURCE -I.  conftest.c  >&5
-configure: In function 'main':
-configure:6457:19: error: implicit declaration of function 'tgoto' [-Wimplicit-function-declaration]
- 6457 | {
-      |                   ^    
-configure:6457:11: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
- 6457 | {
-      |           ^
-configure:6467: $? = 1
-configure: failed program was:
-#line 6451 "configure"
-#include "confdefs.h"
-
-#include <atacterm.h>
-int
-main ()
-{
-char *x = (char *)tgoto("",0,0)
-  ;
-  return 0;
-}
-configure:6430: gcc -o conftest -g -O2  -D_GNU_SOURCE -I. -DNEED_CURSES_H  conftest.c  >&5
-In file included from configure:6419:
-./atacterm.h:14:12: fatal error: curses.h: No such file or directory
-   14 | #  include <curses.h>
-      |            ^~~~~~~~~~
-compilation terminated.
-configure:6433: $? = 1
-configure: failed program was:
-#line 6417 "configure"
-#include "confdefs.h"
-/* NEED_CURSES_H  */
-#include <atacterm.h>
-int
-main ()
-{
-char *x = (char *)tgoto("")
-  ;
-  return 0;
-}
-Recompiling with corrected call (C:NEED_CURSES_H, T:)
-configure:6464: gcc -o conftest -g -O2  -D_GNU_SOURCE -I. -DNEED_CURSES_H  conftest.c  >&5
-In file included from configure:6453:
-./atacterm.h:14:12: fatal error: curses.h: No such file or directory
-   14 | #  include <curses.h>
-      |            ^~~~~~~~~~
-compilation terminated.
-configure:6467: $? = 1
-configure: failed program was:
-#line 6451 "configure"
-#include "confdefs.h"
-
-#include <atacterm.h>
-int
-main ()
-{
-char *x = (char *)tgoto("",0,0)
-  ;
-  return 0;
-}
-configure:6430: gcc -o conftest -g -O2  -D_GNU_SOURCE -I. -DNEED_TERMCAP_H  conftest.c  >&5
-In file included from configure:6419:
-./atacterm.h:21:11: fatal error: termcap.h: No such file or directory
-   21 | # include <termcap.h>
-      |           ^~~~~~~~~~~
-compilation terminated.
-configure:6433: $? = 1
-configure: failed program was:
-#line 6417 "configure"
-#include "confdefs.h"
-/*  NEED_TERMCAP_H */
-#include <atacterm.h>
-int
-main ()
-{
-char *x = (char *)tgoto("")
-  ;
-  return 0;
-}
-Recompiling with corrected call (C:, T:NEED_TERMCAP_H)
-configure:6464: gcc -o conftest -g -O2  -D_GNU_SOURCE -I. -DNEED_TERMCAP_H  conftest.c  >&5
-In file included from configure:6453:
-./atacterm.h:21:11: fatal error: termcap.h: No such file or directory
-   21 | # include <termcap.h>
-      |           ^~~~~~~~~~~
-compilation terminated.
-configure:6467: $? = 1
-configure: failed program was:
-#line 6451 "configure"
-#include "confdefs.h"
-
-#include <atacterm.h>
-int
-main ()
-{
-char *x = (char *)tgoto("",0,0)
-  ;
-  return 0;
-}
-configure:6430: gcc -o conftest -g -O2  -D_GNU_SOURCE -I. -DNEED_CURSES_H -DNEED_TERMCAP_H  conftest.c  >&5
-In file included from configure:6419:
-./atacterm.h:14:12: fatal error: curses.h: No such file or directory
-   14 | #  include <curses.h>
-      |            ^~~~~~~~~~
-compilation terminated.
-configure:6433: $? = 1
-configure: failed program was:
-#line 6417 "configure"
-#include "confdefs.h"
-/* NEED_CURSES_H NEED_TERMCAP_H */
-#include <atacterm.h>
-int
-main ()
-{
-char *x = (char *)tgoto("")
-  ;
-  return 0;
-}
-Recompiling with corrected call (C:NEED_CURSES_H, T:NEED_TERMCAP_H)
-configure:6464: gcc -o conftest -g -O2  -D_GNU_SOURCE -I. -DNEED_CURSES_H -DNEED_TERMCAP_H  conftest.c  >&5
-In file included from configure:6453:
-./atacterm.h:14:12: fatal error: curses.h: No such file or directory
-   14 | #  include <curses.h>
-      |            ^~~~~~~~~~
-compilation terminated.
-configure:6467: $? = 1
-configure: failed program was:
-#line 6451 "configure"
-#include "confdefs.h"
-
-#include <atacterm.h>
-int
-main ()
-{
-char *x = (char *)tgoto("",0,0)
-  ;
-  return 0;
-}
-configure:6510: result: no
+configure:6464: gcc -o conftest -g -O2  -D_GNU_SOURCE -I.  conftest.c -ltermcap -lcurses  >&5
+configure:6467: $? = 0
+configure:6470: test -s conftest
+configure:6473: $? = 0
+Curses/termcap test = yes (C:, T:)
+configure:6510: result: term.h
 configure:6548: checking declaration of tputs 3rd param
 configure:6564: testing loop variables P:int, Q:int, R:int, S: ...
+configure:6581: gcc -c -g -O2  -D_GNU_SOURCE -I. conftest.c >&5
+configure: In function 'main':
+configure:6573:13: error: conflicting types for 'tputs'; have 'int(char *, int,  int (*)(int))'
+ 6573 | extern $Q OutChar($R);
+      |             ^~~~~
+In file included from ./atacterm.h:18,
+                 from configure:6568:
+/usr/include/term.h:855:28: note: previous declaration of 'tputs' with type 'int(const char *, int,  int (*)(int))'
+  855 | extern NCURSES_EXPORT(int) tputs (const char *, int, int (*)(int));
+      |                            ^~~~~
+configure:6584: $? = 1
+configure: failed program was:
+#line 6567 "configure"
+#include "confdefs.h"
+#include <atacterm.h>
+int
+main ()
+{
+extern int OutChar(int);
+	extern int tputs ( char *string, int nlines, int (*_f)(int));
+	tputs("", 1, OutChar)
+  ;
+  return 0;
+}
+configure:6564: testing loop variables P:int, Q:int, R:int, S:const ...
 configure:6581: gcc -c -g -O2  -D_GNU_SOURCE -I. conftest.c >&5
 configure:6584: $? = 0
 configure:6587: test -s conftest.o
@@ -1133,7 +874,6 @@ config.status:7804: creating atacysis/makefile
 config.status:7804: creating tools/makefile
 config.status:7804: creating tutorial/makefile
 config.status:7957: creating config.h
-config.status:8039: config.h is unchanged
 
 ## ----------------- ##
 ## Cache variables.  ##
@@ -1181,19 +921,20 @@ ac_cv_header_sys_stat_h=yes
 ac_cv_header_sys_time_h=yes
 ac_cv_header_sys_types_h=yes
 ac_cv_header_sys_wait_h=yes
-ac_cv_header_term_h=no
-ac_cv_header_termcap_h=no
+ac_cv_header_term_h=yes
+ac_cv_header_termcap_h=yes
 ac_cv_header_time=yes
 ac_cv_header_time_h=yes
 ac_cv_header_unistd_h=yes
 ac_cv_header_varargs_h=no
 ac_cv_host=x86_64-unknown-linux-gnu
 ac_cv_host_alias=x86_64-unknown-linux-gnu
-ac_cv_lib_curses_initscr=no
-ac_cv_lib_termcap_tgoto=no
+ac_cv_lib_curses_initscr=yes
+ac_cv_lib_termcap_tgoto=yes
 ac_cv_objext=o
 ac_cv_path_install='/usr/bin/install -c'
 ac_cv_prog_CPP='gcc -E'
+ac_cv_prog_YACC='bison -y'
 ac_cv_prog_ac_ct_CC=gcc
 ac_cv_prog_cc_g=yes
 ac_cv_prog_cc_stdc=
@@ -1202,10 +943,10 @@ ac_cv_type_signal=int
 ac_cv_type_size_t=yes
 cf_cv_found=yes
 cf_cv_gnu_source=yes
-cf_cv_need_curses_h=no
+cf_cv_need_curses_h=term.h
 cf_cv_system_name=linux-gnu
-cf_cv_term_header=no
-cf_cv_termlib=none
+cf_cv_term_header=term.h
+cf_cv_termlib=termcap
 cf_cv_type_outchar='int OutChar(int)'
 cf_cv_use_ncurses=no
 
@@ -1221,8 +962,12 @@ cf_cv_use_ncurses=no
 #define HAVE_STDARG_H 1
 #define HAVE_SYS_TIME_H 1
 #define HAVE_SYS_WAIT_H 1
+#define HAVE_TERM_H 1
+#define HAVE_TERMCAP_H 1
 #define HAVE_TIME_H 1
 #define HAVE_UNISTD_H 1
+#define HAVE_TERM_H 1
+#define NEED_TERM_H 1
 #define OUTC_RETURN 1
 #define M_TERMINFO 1
 #define HAVE_SYS_TYPES_H 1
