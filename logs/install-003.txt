@@ -1,0 +1,22 @@
+cd atac_i; make
+make[1]: Entering directory '/home/hpc/atac-linux/upstream/atac_i'
+make[1]: Nothing to be done for 'system'.
+make[1]: Leaving directory '/home/hpc/atac-linux/upstream/atac_i'
+cd atacysis; make
+make[1]: Entering directory '/home/hpc/atac-linux/upstream/atacysis'
+make[1]: Nothing to be done for 'system'.
+make[1]: Leaving directory '/home/hpc/atac-linux/upstream/atacysis'
+cd atac_cpp; make
+make[1]: Entering directory '/home/hpc/atac-linux/upstream/atac_cpp'
+make[1]: Nothing to be done for 'system'.
+make[1]: Leaving directory '/home/hpc/atac-linux/upstream/atac_cpp'
+cd tools; make
+make[1]: Entering directory '/home/hpc/atac-linux/upstream/tools'
+make[1]: Nothing to be done for 'system'.
+make[1]: Leaving directory '/home/hpc/atac-linux/upstream/tools'
+#/home/hpc/atac-linux/upstream/_install/lib/atac/README created
+/usr/bin/install -c -m 644 Version /home/hpc/atac-linux/upstream/_install/lib/atac/Version
+cpp_ansi.c:2:1: error: return type defaults to ‘int’ [-Wimplicit-int]
+    2 | main(){return *(m(x))=='x';}
+      | ^~~~
+make: *** [makefile:218: LIB] Error 1

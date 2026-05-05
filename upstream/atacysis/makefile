@@ -114,7 +114,7 @@ CC		= gcc
 CPP		= gcc -E
 INCLUDES	= ..
 CPPFLAGS	=  -D_GNU_SOURCE -I. -I$(INCLUDES) -I$(srcdir)/.. -I$(srcdir) -DHAVE_CONFIG_H
-CFLAGS		= -O2 -Wno-implicit-function-declaration -Wno-int-conversion -std=gnu89 
+CFLAGS		= -O2 -Wno-implicit-function-declaration -std=gnu89 
 
 AOBJ=print.o static.o trace.o main.o summary.o bdisp.o 	\
 	rlist.o ddisp.o disp.o vector.o cdisp.o pdisp.o risk.o error.o	\

@@ -82,7 +82,7 @@ CPP		= gcc -E
 LINK		= $(CC)
 INCLUDES	= ..
 CPPFLAGS	=  -D_GNU_SOURCE -I. -I$(INCLUDES) -I$(srcdir)/.. -I$(srcdir) -DHAVE_CONFIG_H
-CFLAGS		= -O2 -Wno-implicit-function-declaration -Wno-int-conversion -std=gnu89 
+CFLAGS		= -O2 -Wno-implicit-function-declaration -std=gnu89 
 
 SRC=atac atacCC atacLD atacmin atac_rt.c hili.c min.c predefs.list Makefile
 

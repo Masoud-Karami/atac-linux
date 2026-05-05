@@ -48,7 +48,6 @@ checking for varargs.h... egrep: warning: egrep is obsolescent; using grep -E
 no
 checking if you want to see long compiling messages... yes
 checking if you want to use ncurses... no
-checking for tigetstr in -ltinfo... yes
 checking for term.h... term.h
 checking if we should include curses.h or termcap.h... term.h
 checking declaration of tputs 3rd param... int OutChar(int)
@@ -112,3 +111,4 @@ fgrep: warning: fgrep is obsolescent; using grep -F
 egrep: warning: egrep is obsolescent; using grep -E
 egrep: warning: egrep is obsolescent; using grep -E
 config.status: creating config.h
+config.status: config.h is unchanged
