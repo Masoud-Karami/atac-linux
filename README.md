@@ -126,6 +126,51 @@ Verify the installation by checking the command usage:
 atac
 ```
 
+or
+
+## Version Identification
+
+### 1. Verification of Build Version
+
+The version information is stored in a dedicated metadata file during the build process. You can verify the installed version by reading the `Version` file in the library directory:
+
+```bash
+cat _install/lib/atac/Version
+```
+
+### 2. Binary Metadata Check
+
+To ensure the binaries were compiled correctly for your current architecture, use the `file` command:
+
+```bash
+file _install/bin/atac
+```
+
+_Expected Output:_ `ELF 64-bit LSB executable, x86-64, version 1 (SYSV)...`
+
+### 3. Usage Signature
+
+Since this legacy build may not respond to the modern `--version` flag, the presence of the full usage menu serves as the primary confirmation that the tool is operational:
+
+```bash
+# Triggers the usage menu and confirms binary execution
+atac
+```
+
+---
+
+## Technical Specifications (Automated Detection)
+
+During the `./configure` phase, the system identifies the following environment characteristics. These are recorded in `config.h` for reference:
+
+| Parameter            | Detected Value           |
+| :------------------- | :----------------------- |
+| **System Type**      | x86_64-unknown-linux-gnu |
+| **Compiler**         | GCC 15.2.1 (Strict Mode) |
+| **Integer Size**     | 32-bit (Internal Type)   |
+| **Long Size**        | 64-bit (Internal Type)   |
+| **Binary Interface** | ncurses/terminfo         |
+
 ---
 
 ## Troubleshooting
