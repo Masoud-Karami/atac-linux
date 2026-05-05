@@ -82,7 +82,7 @@ CPP		= gcc -E
 LINK		= $(CC)
 INCLUDES	= ..
 CPPFLAGS	=  -D_GNU_SOURCE -I. -I$(INCLUDES) -I$(srcdir)/.. -I$(srcdir) -DHAVE_CONFIG_H
-CFLAGS		= -O2 
+CFLAGS		= -O2 -Wno-implicit-function-declaration -Wno-int-conversion -std=gnu89 
 
 SRC=atac atacCC atacLD atacmin atac_rt.c hili.c min.c predefs.list Makefile
 
@@ -106,7 +106,7 @@ atac_rt.o:	atac_rt.c $(INCLUDES)/portable.h
 hili.o:		hili.c $(INCLUDES)/portable.h
 
 hili:		hili.o
-		$(LINK) $(CFLAGS) hili.o -ltermcap -lcurses  -o $@
+		$(LINK) $(CFLAGS) hili.o -lncurses -o $@
 
 min.o:		$(INCLUDES)/portable.h
 

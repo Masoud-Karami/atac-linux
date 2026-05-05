@@ -48,18 +48,7 @@ checking for varargs.h... egrep: warning: egrep is obsolescent; using grep -E
 no
 checking if you want to see long compiling messages... yes
 checking if you want to use ncurses... no
-checking for tigetstr in -ltinfo... no
-checking for tgetstr in -ltinfo... no
-checking for tigetstr in -lcurses... no
-checking for tgetstr in -lcurses... no
-checking for tigetstr in -lncurses... no
-checking for tgetstr in -lncurses... no
-checking for tigetstr in -ltermlib... no
-checking for tgetstr in -ltermlib... no
-checking for tigetstr in -ltermcap... no
-checking for tgetstr in -ltermcap... no
-checking for initscr in -lcurses... yes
-checking for tgoto in -ltermcap... yes
+checking for tigetstr in -ltinfo... yes
 checking for term.h... term.h
 checking if we should include curses.h or termcap.h... term.h
 checking declaration of tputs 3rd param... int OutChar(int)
@@ -74,16 +63,16 @@ checking for inttypes.h... yes
 checking for stdint.h... yes
 checking for unistd.h... (cached) yes
 checking for size_t... yes
-checking return type of signal handlers... int
+checking return type of signal handlers... void
 checking for atexit... yes
 checking for rename... yes
 checking for on_exit... yes
 checking for strerror... yes
 checking for vfprintf... yes
-checking size of char... unknown
-checking size of short... unknown
-checking size of int... unknown
-checking size of long... unknown
+checking size of char... 8
+checking size of short... 16
+checking size of int... 32
+checking size of long... 64
 fgrep: warning: fgrep is obsolescent; using grep -F
 configure: creating ./config.status
 config.status: creating makefile

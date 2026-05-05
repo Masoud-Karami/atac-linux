@@ -8,7 +8,7 @@ srcdir          = .
 CC		= gcc
 CPP		= gcc -E
 CPPFLAGS	= -I$(srcdir)
-CFLAGS		= -O2 
+CFLAGS		= -O2 -Wno-implicit-function-declaration -Wno-int-conversion -std=gnu89 
 
 wordcount:	wc.o main.o
 		$(CC) -o wordcount wc.o main.o
