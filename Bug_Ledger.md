@@ -78,6 +78,7 @@ To reproduce the current build state and generate the logs:
 - [ ] Tutorial Metadata Generation (`.atac` files)
 - [ ] Instrumented Execution Trace (`.trace` files)
 
+<!--
 The fisrt run for "make":
 make
 cd atac_i; make
@@ -112,3 +113,4 @@ make[1]: Leaving directory '/home/hpc/atac-linux/upstream/tools'
    42 | print(doline, doword, dochar, linect, wordct, charct,
    | ^~~~~
    make: \*\*\* [makefile:20: main.o] Error 1
+-->
