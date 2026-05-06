@@ -4,8 +4,9 @@
 
 This repository documents my attempt to compile and run ATAC, an old C test-coverage tool, on a modern Linux machine.
 
-The original ATAC project is maintained at:
+The original ATAC project is maintained by Thomas E. Dickey, Saul London, and Bob Horgan at:
 https://invisible-island.net/atac/
+Copyright © 1996-2019,2022 by Thomas E. Dickey
 
 This repository is not a new ATAC distribution. It is a porting and reproducibility exercise. The goal is to document the build process, failures, minimal changes, and validation steps.
 
