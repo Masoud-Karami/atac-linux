@@ -1,18 +1,19 @@
 #include <stdio.h>
 
-main(argc,argv)
-	int argc;
-	char **argv;
+main(argc, argv) int argc;
+char **argv;
 {
-	char	*p;
-	long	tlinect = 0, twordct = 0, tcharct = 0;
-	int	linect, wordct, charct;
-	int	doline = 0, doword = 0, dochar = 0;
-	FILE	*file;
+	char *p;
+	long tlinect = 0, twordct = 0, tcharct = 0;
+	int linect, wordct, charct;
+	int doline = 0, doword = 0, dochar = 0;
+	FILE *file;
 
-	if (argc > 1 && argv[1][0] == '-') {
+	if (argc > 1 && argv[1][0] == '-')
+	{
 		for (p = argv[1] + 1; *p; ++p)
-			switch(*p) {
+			switch (*p)
+			{
 			case 'l':
 				doline = 1;
 				break;
@@ -24,49 +25,54 @@ main(argc,argv)
 				break;
 			default:
 				fprintf(stderr, "invalid option: -%c\n",
-					*p);
+						*p);
 			case '?':
-				fputs("usage: wc [-lwc] [files]\n",stderr);
+				fputs("usage: wc [-lwc] [files]\n", stderr);
 				return 1;
 			}
 		argv += 2;
 	}
-	else {
+	else
+	{
 		++argv;
 		doline = doword = dochar = 1;
 	}
 
-	do {
-		if (!*argv) {
+	do
+	{
+		if (!*argv)
+		{
 			count(stdin, &linect, &wordct, &charct);
 			print(doline, doword, dochar, linect, wordct, charct,
-			      "");
+				  "");
 			return;
 		}
-		else {
-		   	file = fopen(*argv, "r");
-			if (file == NULL) {
-			    	perror(*argv);
+		else
+		{
+			file = fopen(*argv, "r");
+			if (file == NULL)
+			{
+				perror(*argv);
 				return 1;
 			}
 			count(file, &linect, &wordct, &charct);
 			fclose(file);
 			print(doline, doword, dochar, linect, wordct, charct,
-			      *argv);
+				  *argv);
 		}
 		tlinect += linect;
 		twordct += wordct;
 		tcharct += charct;
-	} while(*++argv);
+	} while (*++argv);
 
 	print(doline, doword, dochar, tlinect, twordct, tcharct, "total");
 	return 0;
 }
 
-static print(doline, doword, dochar, linect, wordct, charct, file)
-	int	doline,	doword, dochar;
-	int	linect, wordct, charct;
-	char	*file;    
+// static print(doline, doword, dochar, linect, wordct, charct, file)
+print(doline, doword, dochar, linect, wordct, charct, file) int doline, doword, dochar;
+int linect, wordct, charct;
+char *file;
 {
 	if (doline)
 		printf(" %7ld", linect);

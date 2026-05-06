@@ -113,4 +113,6 @@ make[1]: Leaving directory '/home/hpc/atac-linux/upstream/tools'
    42 | print(doline, doword, dochar, linect, wordct, charct,
    | ^~~~~
    make: \*\*\* [makefile:20: main.o] Error 1
+
+static makes it impossible to call the function (the print here) from outside the .c file (static) where it is defined non-static (extern/default) earlier in main.c. The compiler cannot change the print function from public to private-to-file. To fix it, ensure all declarations match, here by removing the static keyword from the second instance.
 -->
