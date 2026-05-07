@@ -69,7 +69,7 @@ char **argv;
 	return 0;
 }
 
-/* static print(doline, doword, dochar, linect, wordct, charct, file) */
+// static print(doline, doword, dochar, linect, wordct, charct, file)
 print(doline, doword, dochar, linect, wordct, charct, file) int doline, doword, dochar;
 int linect, wordct, charct;
 char *file;

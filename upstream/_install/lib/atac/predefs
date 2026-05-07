@@ -1,0 +1,9 @@
+__GNUC__ 15
+__GNUC_MINOR__ 2
+linux 1
+__linux 1
+__linux__ 1
+__STDC__ 1
+unix 1
+__unix 1
+__unix__ 1

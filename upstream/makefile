@@ -215,8 +215,10 @@ LIB:	$(BINDIR) $(LIBDIR)/atac
 	@rm -f cpp_ansi.c cpp_ansi
 	@echo '#define m(a) "a"' >cpp_ansi.c
 	@chmod u+w cpp_ansi.c
-	@echo "main(){return *(m(x))=='x';}" >>cpp_ansi.c
-	@cc -o cpp_ansi cpp_ansi.c
+# 	@echo "main(){return *(m(x))=='x';}" >>cpp_ansi.c # incompatible with modern compilers
+	@echo "int main(void){return *(m(x))=='x';}" >>cpp_ansi.c
+# 	@cc -o cpp_ansi cpp_ansi.c  # hardcoded compiler
+	@$(CC) -o cpp_ansi cpp_ansi.c
 	-@if ./cpp_ansi;						\
 	then								\
 		echo "Default ANSI cpp" >$(LIBDIR)/atac/cpp_ansi;	\
