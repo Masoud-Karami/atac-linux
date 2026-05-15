@@ -175,19 +175,47 @@ Warnings about old-style prototypes are expected. They are not blockers unless t
 
 ---
 
-## Step 7: Patch the `cpp_ansi.c` Feature Test
+## Step 7: Fix the `cpp_ansi.c` Feature Test
 
-The `make LIB` target generates a temporary file named `cpp_ansi.c`.
+The next failure may happen during `make LIB`. At first, this looks confusing because the main binaries may already be built successfully, but the installation step can still fail.
 
-By default, the Makefile generates this old C test:
+The error comes from a temporary file called `cpp_ansi.c` that the Makefile generates during the `LIB` target. The generated file contains this old C-style function:
 
 ```c
 main(){return *(m(x))=='x';}
 ```
 
-Apple Clang rejects it because `main()` has no explicit return type. The Makefile also hardcodes `cc`, which bypasses the compiler flags passed through `CC`.
+Apple Clang rejects this because `main()` has no explicit return type. Older C compilers accepted this style by assuming `int`, but modern Clang does not allow it in this build context.
 
-Patch both `makefile` and `makefile.in` so the fix survives reconfiguration.
+I checked the top-level `makefile` and found the rule that creates `cpp_ansi.c`. The issue was not in a permanent source file. It was in the Makefile line that writes this temporary test program every time `make LIB` runs. Editing `cpp_ansi.c` directly would not solve the problem because the file is regenerated.
+
+The same Makefile rule also used `cc` directly:
+
+```make
+@cc -o cpp_ansi cpp_ansi.c
+```
+
+This bypasses the custom compiler command passed through `CC`.
+
+The fix is to update the Makefile rule manually so that the generated test program uses an explicit return type and the compile command respects `$(CC)`.
+
+Before:
+
+```make
+@echo "main(){return *(m(x))=='x';}" >>cpp_ansi.c
+@cc -o cpp_ansi cpp_ansi.c
+```
+
+After:
+
+```make
+@echo "int main(void){return *(m(x))=='x';}" >>cpp_ansi.c
+@$(CC) -o cpp_ansi cpp_ansi.c
+```
+
+Make the same change in both `makefile` and `makefile.in`. This matters because running `configure` again can regenerate `makefile` from `makefile.in`.
+
+A safe way to apply the edit is:
 
 ```bash
 cd /Volumes/AtacWorkspace/atac-linux/upstream
@@ -217,7 +245,7 @@ for fname in ["makefile", "makefile.in"]:
 PY
 ```
 
-Verify that the patch applied:
+Verify that the patch applied before running `make LIB` again:
 
 ```bash
 grep -n "cpp_ansi.c" makefile | sed -n '1,20p'
@@ -225,20 +253,26 @@ grep -n "int main(void)" makefile
 grep -n '\$(CC) -o cpp_ansi' makefile
 ```
 
-You should see these two lines in the Makefile:
+You should see:
 
 ```make
 @echo "int main(void){return *(m(x))=='x';}" >>cpp_ansi.c
 @$(CC) -o cpp_ansi cpp_ansi.c
 ```
 
-If you still see `main(){return *(m(x))=='x';}`, stop and patch the Makefile again before running `make LIB`.
+If you still see this line, stop and patch the Makefile again:
+
+```c
+main(){return *(m(x))=='x';}
+```
 
 Remove any old generated feature-test file:
 
 ```bash
 rm -f cpp_ansi cpp_ansi.c
 ```
+
+This fix is limited to a small installation-time feature test. It does not change ATAC’s runtime logic.
 
 ---
 
