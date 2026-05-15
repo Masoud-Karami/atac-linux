@@ -38,7 +38,7 @@ Create a new case-sensitive APFS sparse image.
 hdiutil create -type SPARSE -size 1g -fs "Case-sensitive APFS" -volname AtacWorkspace ~/AtacWorkspace
 ```
 
-Expected result:
+You should see:
 
 ```text
 created: /Users/<your-user-name>/AtacWorkspace.sparseimage
@@ -159,7 +159,7 @@ After the build, verify that the core binaries exist:
 ls -l atac_i/atac_i atac_cpp/atac_cpp atacysis/atacysis tools/atacCC tools/hili tools/minimize tools/atac_rt.o
 ```
 
-Expected files include:
+files include:
 
 ```text
 atac_i/atac_i
@@ -307,11 +307,6 @@ which ataclib
 ataclib
 ```
 
-Expected `ataclib` output:
-
-```text
-/Volumes/AtacWorkspace/atac-linux/upstream/_install/lib/atac
-```
 
 Check the runtime directory:
 
@@ -353,7 +348,7 @@ make
 ./wordcount -lwc input1
 ```
 
-Expected output should report:
+The output should be like:
 
 ```text
 1 line, 4 words, 19 characters
@@ -378,7 +373,7 @@ Build with ATAC instrumentation:
 make CC=atacCC CFLAGS="-I. -O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion"
 ```
 
-Expected generated files:
+generated files:
 
 ```text
 main.atac
@@ -425,11 +420,6 @@ Check for trace generation:
 ls -l wordcount.trace
 ```
 
-Expected file:
-
-```text
-wordcount.trace
-```
 
 ---
 
