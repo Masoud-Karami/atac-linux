@@ -1,153 +1,523 @@
-# macOS Setup, Installation & ATAC Tutorial Guide (Apple Silicon M1)
+## macOS / OSX Setup and ATAC Build Notes
 
-This comprehensive guide covers how to safely configure a case-sensitive developer volume, compile the legacy ATAC engine core, and execute the instrumented tutorial workflow on modern ARM64 macOS architectures.
+These steps are for macOS users, especially Apple Silicon users, who want to clone, build, and test ATAC locally.
+
+ATAC contains legacy files whose names differ only by case, such as `VERSION` and `version`. A normal macOS APFS volume is usually case-insensitive, so these files can collide during clone or extraction. This can corrupt the working tree before compilation even starts.
+
+The safest workflow is to build ATAC inside a case-sensitive APFS workspace.
 
 ---
 
-## 1. Environment Preparation (Case-Sensitivity Workaround)
+## Step 1: Wipe and Reset Everything
 
-Because the legacy ATAC source contains direct filename case collisions (`VERSION`/`version` and `INSTALL`/`install-sh`), compiling directly in your standard Mac home directory (`~/`) will cause immediate file truncation and false Git deletion errors. 
-
-### Create and Mount the Case-Sensitive Workspace
-Open your native Mac Terminal or your VS Code integrated terminal and allocate a dynamic virtual disk container:
+Use this step only if you already tried creating a workspace before. If this is your first attempt, start from Step 2.
 
 ```bash
-# 1. Create a 1GB case-sensitive virtual disk image in your Documents folder
-hdiutil create -size 1g -fs "case-sensitive APFS" -volname "AtacWorkspace" ~/Documents/AtacWorkspace.dmg
+# Move out of any active mounted workspace
+cd ~/Documents
 
-# 2. Attach the disk image to your active system
-hdiutil attach ~/Documents/AtacWorkspace.dmg
+# Detach the old workspace if it is mounted
+hdiutil detach /Volumes/AtacWorkspace 2>/dev/null || true
+hdiutil detach -force /Volumes/AtacWorkspace 2>/dev/null || true
 
-# 3. Move your active working directory inside the secure volume
+# Delete old image files from previous attempts
+rm -f ~/AtacWorkspace.dmg
+rm -f ~/AtacWorkspace.sparseimage
+
+# Confirm they are gone. No output means they were removed.
+ls -l ~/AtacWorkspace.dmg ~/AtacWorkspace.sparseimage 2>/dev/null
+```
+
+---
+
+## Step 2: Create a Fresh Case-Sensitive Workspace
+
+Create a new case-sensitive APFS sparse image.
+
+```bash
+hdiutil create -type SPARSE -size 1g -fs "Case-sensitive APFS" -volname AtacWorkspace ~/AtacWorkspace
+```
+
+Expected result:
+
+```text
+created: /Users/<your-user-name>/AtacWorkspace.sparseimage
+```
+
+Important note: because the command uses `-type SPARSE`, macOS creates a `.sparseimage`, not a `.dmg`.
+
+Mount the workspace:
+
+```bash
+hdiutil attach ~/AtacWorkspace.sparseimage
+```
+
+Enter the mounted volume:
+
+```bash
 cd /Volumes/AtacWorkspace
 ```
 
-### Populate Code in the Workspace Volume
-Move your existing local tracking folder or pull a clean tracking environment copy down from GitHub:
-```bash
-# Option A: Migrate an existing local folder structure into the volume
-mv ~/atac-linux /Volumes/AtacWorkspace/
+Check that the volume is really case-sensitive:
 
-# Option B: Clone fresh from your remote GitHub project link
+```bash
+touch version VERSION
+ls -l version VERSION
+rm -f version VERSION
+```
+
+If both `version` and `VERSION` appear separately, the workspace is correct.
+
+You can also create a case-sensitive APFS volume through Disk Utility, but the terminal method above is easier to reproduce.
+
+Apple Disk Utility reference:
+
+https://support.apple.com/en-ca/guide/disk-utility/dskua9e6a110/mac
+
+---
+
+## Step 3: Clone a Fresh Copy of the Repository
+
+Run this inside the mounted case-sensitive workspace:
+
+```bash
+cd /Volumes/AtacWorkspace
+
 git clone <YOUR-GITHUB-REPO-URL> atac-linux
 ```
 
----
-
-## 2. Prerequisites & Makefile Generation
-
-macOS uses the Clang compiler under the hood (aliased as `gcc`). Older C structures require explicit parameters to downgrade legacy errors to warnings.
-
-### Install Developer Dependencies
-Ensure you have the core compiler utilities registered on your Mac:
-```bash
-xcode-select --install
-```
-
-### Generate and Clean the Build Environment
-Navigate to your repository source core, generate your localized configuration templates, and wipe residual targets:
+Move into the ATAC source tree:
 
 ```bash
 cd /Volumes/AtacWorkspace/atac-linux/upstream
-
-# Parse parameters and generate standard Makefiles
-./configure
-
-# Remove stale compilation artifacts
-make clean
 ```
 
 ---
 
-## 3. Core Engine Compilation & Tool Deployment
+## Step 4: Clean Old Build State
 
-Because the standalone `atac_cpp` preprocessor directory contains structural syntax bugs that conflict with modern Apple Silicon environments, compile the active analytical binaries and highlighting dependencies selectively:
+Run this before configuring or rebuilding.
 
 ```bash
-# 1. Compile the active analytical binaries (atac, atacysis, atactm)
-make CFLAGS="-O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type" LIBS="-lncurses"
+make clean 2>/dev/null || true
 
-# 2. Bypass the broken cpp parser block and jump into the helper tools directory
-cd tools
+rm -f config.cache config.log config.status
+rm -f makefile
+rm -f */*.o
+rm -f atac_i/Pgram.c atac_i/Pgram.h atac_i/Pgram.o
+rm -f atac_cpp/cexp.c atac_cpp/cexp.o atac_cpp/atac_cpp
+rm -f cpp_ansi cpp_ansi.c
+```
 
-# 3. Clean and build the highlighting utility (hili) natively
-make clean
-make CFLAGS="-O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type"
+---
 
-# 4. Return to the upstream root layout folder
+## Step 5: Configure with a Local Install Prefix
+
+Do not install into `/usr/local`. Keep the install local inside the repository.
+
+Also, on macOS, use `-lcurses`, not Fedora’s `-lncurses`.
+
+```bash
+unset CC
+unset CFLAGS
+unset CPPFLAGS
+unset LDFLAGS
+unset LIBS
+
+CC=clang \
+CFLAGS="-O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+LIBS="-lcurses" \
+./configure --prefix="$PWD/_install"
+```
+
+The local prefix should be:
+
+```text
+/Volumes/AtacWorkspace/atac-linux/upstream/_install
+```
+
+---
+
+## Step 6: Build the Core ATAC Binaries
+
+Do not run plain `make` on macOS. Some subdirectory rules ignore the exported shell flags, so pass the compatibility settings directly to `make`.
+
+Use the stronger macOS build command:
+
+```bash
+make \
+  CC="clang -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+  CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_BITS_PER_LONG=64" \
+  LIBS="-lcurses"
+```
+
+The `BITS_PER_*` and `HOST_BITS_PER_*` definitions are needed because the legacy ATAC preprocessor code expects old machine-size macros that Apple Clang does not provide by default.
+
+After the build, verify that the core binaries exist:
+
+```bash
+ls -l atac_i/atac_i atac_cpp/atac_cpp atacysis/atacysis tools/atacCC tools/hili tools/minimize tools/atac_rt.o
+```
+
+Expected files include:
+
+```text
+atac_i/atac_i
+atac_cpp/atac_cpp
+atacysis/atacysis
+tools/atacCC
+tools/hili
+tools/minimize
+tools/atac_rt.o
+```
+
+Warnings about old-style prototypes are expected. They are not blockers unless the build stops with an error.
+
+---
+
+## Step 7: Patch the `cpp_ansi.c` Feature Test
+
+The `make LIB` target generates a temporary file named `cpp_ansi.c`.
+
+By default, the Makefile generates this old C test:
+
+```c
+main(){return *(m(x))=='x';}
+```
+
+Apple Clang rejects it because `main()` has no explicit return type. The Makefile also hardcodes `cc`, which bypasses the compiler flags passed through `CC`.
+
+Patch both `makefile` and `makefile.in` so the fix survives reconfiguration.
+
+```bash
 cd /Volumes/AtacWorkspace/atac-linux/upstream
 
-# 5. Build standard target tracking directories
-mkdir -p _install/bin
-mkdir -p _install/lib/atac
+python3 - <<'PY'
+from pathlib import Path
 
-# 6. Manually copy the operational binaries into position
-cp atacysis/atacysis _install/bin/atac
-cp tools/hili _install/bin/
-cp Version _install/lib/atac/
+for fname in ["makefile", "makefile.in"]:
+    p = Path(fname)
+    if not p.exists():
+        continue
 
-# 7. Bind your custom binary workspace to your active shell path string
+    s = p.read_text()
+
+    s = s.replace(
+        '@echo "main(){return *(m(x))==\'x\';}" >>cpp_ansi.c',
+        '@echo "int main(void){return *(m(x))==\'x\';}" >>cpp_ansi.c'
+    )
+
+    s = s.replace(
+        '@cc -o cpp_ansi cpp_ansi.c',
+        '@$(CC) -o cpp_ansi cpp_ansi.c'
+    )
+
+    p.write_text(s)
+    print(f"patched {fname}")
+PY
+```
+
+Verify that the patch applied:
+
+```bash
+grep -n "cpp_ansi.c" makefile | sed -n '1,20p'
+grep -n "int main(void)" makefile
+grep -n '\$(CC) -o cpp_ansi' makefile
+```
+
+You should see these two lines in the Makefile:
+
+```make
+@echo "int main(void){return *(m(x))=='x';}" >>cpp_ansi.c
+@$(CC) -o cpp_ansi cpp_ansi.c
+```
+
+If you still see `main(){return *(m(x))=='x';}`, stop and patch the Makefile again before running `make LIB`.
+
+Remove any old generated feature-test file:
+
+```bash
+rm -f cpp_ansi cpp_ansi.c
+```
+
+---
+
+## Step 8: Install Runtime Layout Locally
+
+Run `make LIB` with the same macOS compiler settings.
+
+```bash
+make LIB \
+  CC="clang -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+  CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_BITS_PER_LONG=64" \
+  LIBS="-lcurses"
+```
+
+Then install the command wrappers:
+
+```bash
+make BIN
+```
+
+Add the local ATAC installation to your shell path:
+
+```bash
 export PATH="$PWD/_install/bin:$PATH"
 ```
 
+Verify the installation:
+
+```bash
+which atacCC
+which ataclib
+ataclib
+```
+
+Expected `ataclib` output:
+
+```text
+/Volumes/AtacWorkspace/atac-linux/upstream/_install/lib/atac
+```
+
+Check the runtime directory:
+
+```bash
+find "$PWD/_install/lib/atac" -maxdepth 1 -type f -print
+```
+
+Expected runtime files include:
+
+```text
+atac_i
+atac_cpp
+atacysis
+atac_to_bin
+minimize
+hili
+predefs
+predefs.c
+atac_rt.o
+loguse
+Version
+cpp_ansi
+```
+
 ---
 
-## 4. Instrumented Tutorial Validation Workflow (`wordcount`)
+## Step 9: Baseline Tutorial Build Without ATAC
 
-Do not compile raw objects manually with `gcc`, as tracking symbols require automated source tables mapped by the sub-makefile environment. Let the integrated test pipeline generate the code block tracking hooks automatically:
+Before testing instrumentation, confirm that the tutorial program works normally.
 
-### Compile the Instrumented Target
 ```bash
-# Navigate to the tutorial sample test suite
 cd /Volumes/AtacWorkspace/atac-linux/upstream/tutorial
 
-# Clear existing uninstrumented verification layers
-make clean 2>/dev/null || rm -f *.o wordcount wordcount.trace
+make clean 2>/dev/null || true
+rm -f *.o wordcount *.atac wordcount.trace
 
-# Force-compile the instrumented configuration version of wordcount
-make wordcount CFLAGS="-O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-error=implicit-function-declaration"
-```
-
-### Execute Coverage Trace Capture Passes
-Run your functional test scenarios against the baseline tracking target program to populate active branch logs:
-```bash
-# Execute Test Case 1 (Standard execution mapping pass)
+make
 ./wordcount input1
-
-# Execute Test Case 2 (Multi-flag processing pass)
 ./wordcount -lwc input1
-
-# Confirm the file runtime engine captured execution trends
-ls -la wordcount.trace
 ```
 
-### Analyze Coverage Reports & Highlight Missing Paths
-Leverage your compiled profile suite to evaluate your overall code block coverage percentages and visually inspect code coverage gaps directly inside your terminal window:
+Expected output should report:
+
+```text
+1 line, 4 words, 19 characters
+```
+
+This confirms that the tutorial program itself is valid.
+
+---
+
+## Step 10: Build the Tutorial with `atacCC`
+
+Clean the tutorial directory again:
 
 ```bash
-# Verify your manual installation directory continues to be mapped in your path string
-export PATH="/Volumes/AtacWorkspace/atac-linux/upstream/_install/bin:$PATH"
+make cleanup 2>/dev/null || true
+rm -f *.o wordcount *.atac wordcount.trace
+```
 
-# Generate a high-level testing summary profile report
-atac -s -f wordcount.trace main.c wc.c
+Build with ATAC instrumentation:
 
-# Use the 'hili' engine to highlight unexecuted code lines (e.g. error checks, missing options)
-atac -mb wordcount.trace main.c wc.c
+```bash
+make CC=atacCC CFLAGS="-I. -O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion"
+```
+
+Expected generated files:
+
+```text
+main.atac
+wc.atac
+main.o
+wc.o
+wordcount
+```
+
+Verify:
+
+```bash
+ls -l *.atac *.o wordcount
+```
+
+If this step fails on macOS system headers or parser behavior, capture the full error. Fedora required additional tutorial-level parser flags, but macOS may expose different header behavior.
+
+---
+
+## Step 11: Run the Instrumented Tutorial Program
+
+Run the tutorial tests:
+
+```bash
+./wordcount input1
+./wordcount -lwc input1
+```
+
+Optional additional tests:
+
+```bash
+./wordcount -l input1
+./wordcount -w input1
+./wordcount -c input1
+./wordcount -lw input1
+./wordcount -lc input1
+./wordcount -wc input1
+echo "hello world" | ./wordcount
+```
+
+Check for trace generation:
+
+```bash
+ls -l wordcount.trace
+```
+
+Expected file:
+
+```text
+wordcount.trace
 ```
 
 ---
 
-## Technical Workspace Re-entry Note
+## Step 12: Generate the Coverage Summary
 
-The virtual disk structure (`AtacWorkspace`) will unmount when your Mac restarts or sleeps deeply. If you open your project repository folder later and find an empty directory layout, run this sequence to restore your environmental parameters:
+Use the `.atac` metadata files, not the `.c` source files.
 
 ```bash
-# Attach the workspace image container and mount paths
-hdiutil attach ~/Documents/AtacWorkspace.dmg
-
-# Change directory back into your working tree
-cd /Volumes/AtacWorkspace/atac-linux/upstream
-
-# Re-register your binary path strings to resume profiling assignments
-export PATH="$PWD/_install/bin:$PATH"
+atac -s -f wordcount.trace main.atac wc.atac
 ```
+
+The expected format is a coverage table with rows for:
+
+```text
+main
+print
+count
+== total ==
+```
+
+---
+
+## Common macOS Failure Points
+
+### Failure: `hdiutil create failed - Invalid argument`
+
+Use the exact case-sensitive filesystem name:
+
+```bash
+hdiutil create -type SPARSE -size 1g -fs "Case-sensitive APFS" -volname AtacWorkspace ~/AtacWorkspace
+```
+
+Then attach the `.sparseimage` file:
+
+```bash
+hdiutil attach ~/AtacWorkspace.sparseimage
+```
+
+Do not attach `~/AtacWorkspace.dmg` unless you actually created a `.dmg`.
+
+---
+
+### Failure: `C compiler cannot create executables`
+
+Clear old variables and avoid Fedora-specific linker flags.
+
+```bash
+unset CC
+unset CFLAGS
+unset CPPFLAGS
+unset LDFLAGS
+unset LIBS
+```
+
+Then configure with:
+
+```bash
+CC=clang \
+CFLAGS="-O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+LIBS="-lcurses" \
+./configure --prefix="$PWD/_install"
+```
+
+If this still fails, inspect:
+
+```bash
+tail -80 config.log
+```
+
+---
+
+### Failure: `yylex` or `yyerror` undeclared in `Pgram.c`
+
+Do not run plain `make`.
+
+Use:
+
+```bash
+make \
+  CC="clang -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+  CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_BITS_PER_LONG=64" \
+  LIBS="-lcurses"
+```
+
+---
+
+### Failure: `BITS_PER_UNIT` or `HOST_BITS_PER_LONG` undeclared
+
+Use the stronger macOS `CFLAGS`:
+
+```bash
+CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_BITS_PER_LONG=64"
+```
+
+---
+
+### Failure: `cpp_ansi.c` rejects `main()`
+
+Patch `makefile` and `makefile.in` as described in Step 7.
+
+This error means `make LIB` is still generating:
+
+```c
+main(){return *(m(x))=='x';}
+```
+
+The Makefile must generate:
+
+```c
+int main(void){return *(m(x))=='x';}
+```
+
+---
+
+### Failure: `Permission denied` under `/usr/local`
+
+You configured without a local prefix.
+
+Reconfigure with:
+
+```bash
+./configure --prefix="$PWD/_install"
+```
+
+Do not use `sudo` for this porting workflow. Keep the install inside the repository.
