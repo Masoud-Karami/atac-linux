@@ -9,6 +9,12 @@ https://invisible-island.net/atac/
 
 The most important point is that the repository must be cloned inside a case-sensitive filesystem. ATAC contains files whose names differ only by case, such as `VERSION` and `version`. On the default macOS filesystem, these names can collide and damage the source tree before the build even starts.
 - https://stackoverflow.com/questions/25575463/git-macos-case-sensitive-overwrite-issues
+
+You can also create a case-sensitive APFS volume through Disk Utility, but the terminal method in the following is easier to reproduce.
+
+Apple Disk Utility reference:
+https://support.apple.com/en-ca/guide/disk-utility/dskua9e6a110/mac
+
 ---
 
 ## Source
@@ -35,9 +41,29 @@ The most important point is that the repository must be cloned inside a case-sen
 # Installation Guide on MacBooke Apple Air M1 2020 (MacOS Version 26.1)
 
 
+## Step 0: Create a Case-Sensitive APFS Workspace
+_Use this step only if you already tried creating a workspace before. If this is your first attempt, start from Step 1_
+
+```bash
+# Detach the old workspace if it is mounted
+hdiutil detach /Volumes/AtacWorkspace 2>/dev/null || true
+hdiutil detach -force /Volumes/AtacWorkspace 2>/dev/null || true
+
+# Delete old image files from previous attempts
+rm -f ~/AtacWorkspace.dmg
+rm -f ~/AtacWorkspace.sparseimage
+
+# Confirm they are gone. No output means they were removed.
+ls -l ~/AtacWorkspace.dmg ~/AtacWorkspace.sparseimage 2>/dev/null
+```
+
+---
+
+
 ## Step 1: Create a Case-Sensitive APFS Workspace
 
-Create a case-sensitive sparse image.
+Create a case-sensitive sparse image. 
+_Important note:_ because the command uses `-type SPARSE`, macOS creates a `.sparseimage`, not a `.dmg`.
 
 ```bash
 hdiutil create -type SPARSE -size 1g -fs "Case-sensitive APFS" -volname AtacWorkspace ~/AtacWorkspace
@@ -49,15 +75,10 @@ This creates the file below.
 ~/AtacWorkspace.sparseimage
 ```
 
-Mount it.
+Mount and Enter
 
 ```bash
 hdiutil attach ~/AtacWorkspace.sparseimage
-```
-
-Enter the mounted workspace.
-
-```bash
 cd /Volumes/AtacWorkspace
 ```
 
@@ -66,10 +87,13 @@ Check that the workspace is case-sensitive.
 ```bash
 touch version VERSION
 ls -l version VERSION
+#  If both `version` and `VERSION` appear as separate files, the workspace is correct.
+```
+
+```bash
 rm -f version VERSION
 ```
 
-If both `version` and `VERSION` appear as separate files, the workspace is correct.
 
 ---
 
@@ -96,14 +120,16 @@ makefile
 
 If `makefile` does not exist yet, edit `makefile.in` first, run `configure`, then edit the generated `makefile`.
 
-Find this block.
+There are two problems inside the makefile.in
+Find these lines.
 
 ```make
 @echo "main(){return *(m(x))=='x';}" >>cpp_ansi.c
 @cc -o cpp_ansi cpp_ansi.c
 ```
-
-Change it to this.
+In the first line, Apple Clang does not accept the old implicit `-int` form of `main()` in this generated test file
+Second, the original rule calls `cc` directly. That bypasses the compiler command we pass through `CC`. Using `$(CC)` keeps the build consistent.
+Fix them to this.
 
 ```make
 @echo "int main(void){return *(m(x))=='x';}" >>cpp_ansi.c
