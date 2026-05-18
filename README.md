@@ -32,7 +32,7 @@ The most important point is that the repository must be cloned inside a case-sen
 - `patches/`: optional exported patches.
 - `logs/`: selected configure/build/test logs.
 
-# Installation Guide on MacBooke Apple Air M1 2020 (MacOS Version 26.1)
+# Installation Guide on MacBooke Apple Air M1 2020 (macOS Tahoe Version 26.1)
 
 
 ## Step 1: Create a Case-Sensitive APFS Workspace
