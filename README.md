@@ -103,7 +103,7 @@ Clone ATAC inside the case-sensitive workspace.
 
 ```bash
 cd /Volumes/AtacWorkspace
-git clone <YOUR-GITHUB-REPO-URL> atac-linux
+git clone <YOUR-GITHUB-REPO-URL> atac-MacOS # or another branch from the main repo
 cd /Volumes/AtacWorkspace/atac-linux/upstream
 ```
 
@@ -118,10 +118,10 @@ makefile.in
 makefile
 ```
 
-If `makefile` does not exist yet, edit `makefile.in` first, run `configure`, then edit the generated `makefile`.
+If `makefile` does not exist yet, edit `makefile.in` first, run `configure`, then edit the generated `makefile` later exactly the same way as here.
 
-There are two problems inside the makefile.in
-Find these lines.
+The installation at this step stpped with two problems inside the makefile.in
+Find these lines:
 
 ```make
 @echo "main(){return *(m(x))=='x';}" >>cpp_ansi.c
@@ -129,7 +129,7 @@ Find these lines.
 ```
 In the first line, Apple Clang does not accept the old implicit `-int` form of `main()` in this generated test file
 Second, the original rule calls `cc` directly. That bypasses the compiler command we pass through `CC`. Using `$(CC)` keeps the build consistent.
-Fix them to this.
+Fix them by modifying to:
 
 ```make
 @echo "int main(void){return *(m(x))=='x';}" >>cpp_ansi.c
@@ -148,7 +148,7 @@ Do not edit `cpp_ansi.c` directly. It is generated during `make LIB`, so a direc
 
 ## Step 4: Configure with a Local Install Prefix
 
-Keep the installation inside the repository. Do not use `/usr/local` and do not use `sudo`.
+Keep the installation inside the repository.
 
 ```bash
 ./configure --prefix="$PWD/_install" \
@@ -157,17 +157,7 @@ CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_B
 LIBS="-lcurses"
 ```
 
-On macOS, use this library option.
-
-```bash
--lcurses
-```
-
-Do not use this one.
-
-```bash
--lncurses
-```
+_Note_, on macOS, use `-lcurses`, not Linux’s `-lncurses`.
 
 ---
 
@@ -209,9 +199,24 @@ aTaC(int level,
      long blk)
 ```
 
-This is the key Apple Silicon runtime fix. Without it, the instrumented tutorial program can build and link, but it can crash immediately when it enters the ATAC runtime.
+As a consequence of this modificatio, another error appears that the `linect`, `wordct`, and `charct` are `int`, not `long`. This caused the huge wrong numbers like 8589934593. On arm64 this corrupts argument reading and also damages the following %s filename argument. So we fix the bad `printf("%ld", int)` format strings by modifying 
 
-Some compiler warnings may remain after this change, especially around format strings in `tools/atac_rt.c`. These warnings are not the blocker being fixed here.
+```c
+printf(" %7ld", linect);
+printf(" %7ld", wordct);
+printf(" %7ld", charct);
+```
+
+into 
+```c
+printf(" %7d", linect);
+printf(" %7d", wordct);
+printf(" %7d", charct);
+```
+
+This is the key MacOS runtime fix. Without it, the instrumented tutorial program can crash immediately when it enters the ATACs runtime.
+
+Some compiler warnings may remain after this change, especially around format strings in `tools/atac_rt.c`. These warnings are not the main focus to be fixed here.
 
 ---
 
@@ -227,6 +232,7 @@ rm -f cpp_ansi cpp_ansi.c
 ```
 
 Build ATAC.
+Do not run plain `make` on macOS. Run the entire command as
 
 ```bash
 make \
@@ -237,7 +243,6 @@ LIBS="-lcurses"
 
 The `BITS_PER_*` and `HOST_BITS_PER_*` definitions are needed because the old ATAC preprocessor expects machine-size macros that Apple Clang does not define by default.
 
-Warnings about old C prototypes are expected.
 
 ---
 
@@ -277,7 +282,7 @@ which atac
 which atacCC
 which ataclib
 ataclib
-atac -v
+atac -v # Milestone: We have now reached the first command of the tutorial (https://invisible-island.net/atac/atac-tutorial.pdf). Everything done prior to this was the essential pre-installation phase—setting up our case-sensitive volume, resolving compiler errors, and compiling the core binaries.
 ```
 
 The version command should report ATAC release `3.3.13`.
