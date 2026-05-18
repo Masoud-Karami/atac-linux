@@ -123,13 +123,13 @@
 #-----------------------------------------------end of log
 
 SHELL		= /bin/sh
-@SET_MAKE@
-prefix		= @prefix@
-INSTALLDIR	= @exec_prefix@
 
-INSTALL		= @INSTALL@
-INSTALL_PROGRAM	= @INSTALL_PROGRAM@
-INSTALL_DATA	= @INSTALL_DATA@
+prefix		= /Volumes/AtacWorkspace/atac-linux/upstream/_install
+INSTALLDIR	= ${prefix}
+
+INSTALL		= /opt/homebrew/bin/ginstall -c
+INSTALL_PROGRAM	= ${INSTALL}
+INSTALL_DATA	= ${INSTALL} -m 644
 
 BINDIR		= $(INSTALLDIR)/bin
 LIBDIR		= $(INSTALLDIR)/lib

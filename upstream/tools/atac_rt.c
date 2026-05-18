@@ -243,7 +243,7 @@ static int restartFlag = 0;
 static char *restartTestName = NULL;
 
 /* forward declarations */
-extern int aTaC(int level, int blk);
+extern int aTaC(int level, long blk);
 extern int aTaC_fork(void);
 extern int atac_child(void);
 extern void aTaC_dump(void);
@@ -526,7 +526,7 @@ write_timestamp(void)
 
 int				/* returns call level */
 aTaC(int level,
-     int blk)
+     long blk)
 {
     static int call_level = -1;
     static int busy = 0;

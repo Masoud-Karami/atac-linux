@@ -1,0 +1,13 @@
+makarami Sun May 17 17:03:54 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -v
+makarami Sun May 17 17:06:00 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atacCC -I. -I. -O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion -c ./wc.c
+makarami Sun May 17 17:06:00 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atacCC -I. -I. -O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion -c ./main.c
+makarami Sun May 17 17:06:00 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atacCC -o wordcount wc.o main.o
+makarami Sun May 17 17:06:35 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -s -f wordcount.trace main.atac wc.atac
+makarami Sun May 17 17:14:32 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -s -f wordcount.trace main.atac wc.atac
+makarami Sun May 17 17:15:16 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -s -f wordcount.trace main.atac wc.atac
+makarami Sun May 17 17:16:49 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -s -f wordcount.trace main.atac wc.atac
+makarami Sun May 17 17:17:42 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac main.atac wc.atac
+makarami Sun May 17 17:17:56 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -s -f wordcount.trace main.atac wc.atac
+makarami Sun May 17 17:18:40 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -s -f wordcount.trace main.atac wc.atac
+makarami Sun May 17 17:19:14 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -f wordcount.trace main.atac wc.atac
+makarami Sun May 17 17:19:36 EDT 2026 /Volumes/AtacWorkspace/atac-linux/upstream/_install/bin/atac -s -f wordcount.trace main.atac wc.atac
