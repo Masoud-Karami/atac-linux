@@ -1,13 +1,15 @@
-# atac-linux
+# Automatic Test Analyzer in C (ATAC) macOS / OSX Setup
 
-# Automatic Test Analyzer in C (ATAC) Modern Linux Porting Exercise
+These notes explain how to build and test ATAC on macOS, especially on Apple Silicon.
 
-This repository documents my attempt to compile and run ATAC, an old C test-coverage tool, on a modern Linux machine.
+ATAC is a legacy C tool, so a modern macOS system needs a few small compatibility fixes before the build works cleanly.
 
 The original ATAC project is maintained at:
 https://invisible-island.net/atac/
 
-This repository is not a new ATAC distribution. It is a porting and reproducibility exercise. The goal is to document the build process, failures, minimal changes, and validation steps.
+The most important point is that the repository must be cloned inside a case-sensitive filesystem. ATAC contains files whose names differ only by case, such as `VERSION` and `version`. On the default macOS filesystem, these names can collide and damage the source tree before the build even starts.
+
+---
 
 ## Source
 
@@ -17,7 +19,7 @@ This repository is not a new ATAC distribution. It is a porting and reproducibil
 
 ## Goals
 
-1. Build ATAC from source on Linux.
+1. Build ATAC from source on MacOS MacBooke M1.
 2. Identify build and portability issues.
 3. Make minimal source or build-system changes.
 4. Validate the result using the tutorial `wordcount` example.
@@ -30,150 +32,638 @@ This repository is not a new ATAC distribution. It is a porting and reproducibil
 - `patches/`: optional exported patches.
 - `logs/`: selected configure/build/test logs.
 
-# Installation Guide on Fedora Linux 42 (Workstation) Linux 6.19.14-100.fc42.x86_64
+# Installation Guide on MacBooke Apple Air M1 2020 (MacOS Version 26.1)
 
-## Overview
 
-This document provides instructions for compiling and installing ATAC from source on a modern 64-bit Linux environment. Due to the legacy nature of the codebase, specific compiler flags and dependency management are required to ensure compatibility with modern GCC standards.
+## Step 1: Create a Case-Sensitive APFS Workspace
+
+Create a case-sensitive sparse image.
+
+```bash
+hdiutil create -type SPARSE -size 1g -fs "Case-sensitive APFS" -volname AtacWorkspace ~/AtacWorkspace
+```
+
+This creates the file below.
+
+```bash
+~/AtacWorkspace.sparseimage
+```
+
+Mount it.
+
+```bash
+hdiutil attach ~/AtacWorkspace.sparseimage
+```
+
+Enter the mounted workspace.
+
+```bash
+cd /Volumes/AtacWorkspace
+```
+
+Check that the workspace is case-sensitive.
+
+```bash
+touch version VERSION
+ls -l version VERSION
+rm -f version VERSION
+```
+
+If both `version` and `VERSION` appear as separate files, the workspace is correct.
 
 ---
 
-## Prerequisites
+## Step 2: Clone a Fresh Repository
 
-### System Dependencies
-
-Ensure your system has the following development tools and libraries installed:
+Clone ATAC inside the case-sensitive workspace.
 
 ```bash
-# For Fedora/RHEL/CentOS
-sudo dnf group install "Development Tools"
-sudo dnf install ncurses-devel bison byacc glibc-devel.i686
-```
-
----
-
-## Build Instructions
-
-### 1. Environment Configuration
-
-To maintain compatibility with modern GCC (which treats legacy C patterns as errors), you must relax the compiler strictness and define the installation prefix.
-
-```bash
-export CFLAGS="-O2 -Wno-implicit-function-declaration -Wno-int-conversion -std=gnu89"
-export LIBS="-lncurses"
-```
-
-### 2. Configure the Build
-
-From the `upstream` directory, run the configuration script. We redirect logs to a dedicated folder for troubleshooting.
-
-```bash
-mkdir -p ../logs
-./configure --prefix="$PWD/_install" 2>&1 | tee ../logs/configure.txt
-```
-
-### 3. Compile the Source
-
-Execute the build using `make`.
-
-```bash
-make 2>&1 | tee ../logs/make.txt
-```
-
----
-
-## Installation
-
-### Manual Deployment
-
-Due to strictness in the legacy installation script's feature tests, a manual installation is recommended to ensure all binaries are correctly placed:
-
-```bash
-# Create target directories
-mkdir -p _install/bin
-mkdir -p _install/lib/atac
-
-# Deploy binaries
-cp atacysis/atacysis _install/bin/atac
-cp tools/hili _install/bin/
-cp atac_cpp/atac_cpp _install/bin/
-cp Version _install/lib/atac/
+cd /Volumes/AtacWorkspace
+git clone <YOUR-GITHUB-REPO-URL> atac-linux
+cd /Volumes/AtacWorkspace/atac-linux/upstream
 ```
 
 ---
 
-## Post-Installation Setup
+## Step 3: Patch the `cpp_ansi.c` Feature Test Manually
 
-### Environment Variables
+Before building, edit both files below.
 
-To use ATAC commands globally, add the bin directory to your `PATH`. Add the following line to your `~/.bashrc` file:
-
-```bash
-export PATH="$PATH:/path/to/your/atac-linux/upstream/_install/bin"
+```text
+makefile.in
+makefile
 ```
 
-Apply the changes:
+If `makefile` does not exist yet, edit `makefile.in` first, run `configure`, then edit the generated `makefile`.
 
-```bash
-source ~/.bashrc
+Find this block.
+
+```make
+@echo "main(){return *(m(x))=='x';}" >>cpp_ansi.c
+@cc -o cpp_ansi cpp_ansi.c
 ```
 
-### Verification
+Change it to this.
 
-Verify the installation by checking the command usage:
-
-```bash
-atac
+```make
+@echo "int main(void){return *(m(x))=='x';}" >>cpp_ansi.c
+@$(CC) -o cpp_ansi cpp_ansi.c
 ```
 
-or
+This fixes two problems.
 
-## Version Identification
+First, Apple Clang does not accept the old implicit-`int` form of `main()` in this generated test file.
 
-### 1. Verification of Build Version
+Second, the original rule calls `cc` directly. That bypasses the compiler command passed through `CC`. Using `$(CC)` keeps the build consistent.
 
-The version information is stored in a dedicated metadata file during the build process. You can verify the installed version by reading the `Version` file in the library directory:
+Do not edit `cpp_ansi.c` directly. It is generated during `make LIB`, so a direct edit would be overwritten.
+
+---
+
+## Step 4: Configure with a Local Install Prefix
+
+Keep the installation inside the repository. Do not use `/usr/local` and do not use `sudo`.
 
 ```bash
-cat _install/lib/atac/Version
+./configure --prefix="$PWD/_install" \
+CC="clang -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_BITS_PER_LONG=64" \
+LIBS="-lcurses"
 ```
 
-### 2. Binary Metadata Check
-
-To ensure the binaries were compiled correctly for your current architecture, use the `file` command:
+On macOS, use this library option.
 
 ```bash
-file _install/bin/atac
+-lcurses
 ```
 
-_Expected Output:_ `ELF 64-bit LSB executable, x86-64, version 1 (SYSV)...`
-
-### 3. Usage Signature
-
-Since this legacy build may not respond to the modern `--version` flag, the presence of the full usage menu serves as the primary confirmation that the tool is operational:
+Do not use this one.
 
 ```bash
-# Triggers the usage menu and confirms binary execution
-atac
+-lncurses
 ```
 
 ---
 
-## Technical Specifications (Automated Detection)
+## Step 5: Patch the ATAC Runtime for Apple Silicon
 
-During the `./configure` phase, the system identifies the following environment characteristics. These are recorded in `config.h` for reference:
+On Apple Silicon, pointers are 64-bit, but `int` is 32-bit. The ATAC runtime passes a table pointer through an `int`, then casts it back to a pointer. This causes a crash inside `aTaC`.
 
-| Parameter            | Detected Value           |
-| :------------------- | :----------------------- |
-| **System Type**      | x86_64-unknown-linux-gnu |
-| **Compiler**         | GCC 15.2.1 (Strict Mode) |
-| **Integer Size**     | 32-bit (Internal Type)   |
-| **Long Size**        | 64-bit (Internal Type)   |
-| **Binary Interface** | ncurses/terminfo         |
+Open this file.
+
+```text
+tools/atac_rt.c
+```
+
+Find this declaration.
+
+```c
+extern int aTaC(int level, int blk);
+```
+
+Change it to this.
+
+```c
+extern int aTaC(int level, long blk);
+```
+
+Then find this function definition.
+
+```c
+int
+aTaC(int level,
+     int blk)
+```
+
+Change it to this.
+
+```c
+int
+aTaC(int level,
+     long blk)
+```
+
+This is the key Apple Silicon runtime fix. Without it, the instrumented tutorial program can build and link, but it can crash immediately when it enters the ATAC runtime.
+
+Some compiler warnings may remain after this change, especially around format strings in `tools/atac_rt.c`. These warnings are not the blocker being fixed here.
 
 ---
 
-## Troubleshooting
+## Step 6: Build ATAC
 
-- **Missing ncurses**: If the linker fails with `undefined reference to vidattr`, ensure `LIBS="-lncurses"` is exported during configuration.
-- **Type Size Warnings**: On 64-bit systems, `config.h` may report sizes in bits (e.g., `INT_TYPE_SIZE 32`). This is expected behavior for this legacy codebase and does not prevent functionality.
+Do not run plain `make` on macOS. Pass the compiler settings directly to `make`.
+
+Clean the generated feature-test and parser files first.
+
+```bash
+rm -f atac_i/Pgram.c atac_i/Pgram.h atac_i/Pgram.o
+rm -f cpp_ansi cpp_ansi.c
+```
+
+Build ATAC.
+
+```bash
+make \
+CC="clang -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_BITS_PER_LONG=64" \
+LIBS="-lcurses"
+```
+
+The `BITS_PER_*` and `HOST_BITS_PER_*` definitions are needed because the old ATAC preprocessor expects machine-size macros that Apple Clang does not define by default.
+
+Warnings about old C prototypes are expected.
+
+---
+
+## Step 7: Install the Runtime Layout Locally
+
+Clean the generated feature-test files again.
+
+```bash
+rm -f cpp_ansi cpp_ansi.c
+```
+
+Build the runtime layout.
+
+```bash
+make LIB \
+CC="clang -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+CFLAGS="-O2 -DBITS_PER_UNIT=8 -DBITS_PER_WORD=64 -DHOST_BITS_PER_INT=32 -DHOST_BITS_PER_LONG=64" \
+LIBS="-lcurses"
+```
+
+Then install the command wrappers.
+
+```bash
+make BIN
+```
+
+Add the local tools to the current shell.
+
+```bash
+export PATH="$PWD/_install/bin:$PATH"
+```
+
+Verify the installed commands.
+
+```bash
+which atac
+which atacCC
+which ataclib
+ataclib
+atac -v
+```
+
+The version command should report ATAC release `3.3.13`.
+
+Also check the runtime directory.
+
+```bash
+find "$PWD/_install/lib/atac" -maxdepth 1 -type f -print | sort
+```
+
+Important files include the following.
+
+```text
+atac_i
+atac_cpp
+atacysis
+atac_to_bin
+atac_rt.o
+hili
+minimize
+predefs
+predefs.c
+cpp_ansi
+loguse
+Version
+```
+
+---
+
+## Step 8: Patch the Tutorial Source
+
+Move to the tutorial directory.
+
+```bash
+cd /Volumes/AtacWorkspace/atac-linux/upstream/tutorial
+```
+
+Open this file.
+
+```text
+main.c
+```
+
+At the very top of the file, before `main`, add this declaration.
+
+```c
+static int print();
+```
+
+This avoids the conflict where `print()` is called before its later static definition.
+
+In the same file, find these three lines.
+
+```c
+printf(" %7ld", linect);
+printf(" %7ld", wordct);
+printf(" %7ld", charct);
+```
+
+Change them to this.
+
+```c
+printf(" %7d", linect);
+printf(" %7d", wordct);
+printf(" %7d", charct);
+```
+
+The counters are `int`, not `long`. On arm64, the old `%ld` format produced incorrect values such as `8589934593` and also damaged the following filename output.
+
+---
+
+## Step 9: Build and Test the Normal Tutorial Program
+
+The normal baseline build should use Apple’s real system headers. Do not use the local `stdio.h` shim for this step.
+
+Remove any old shim.
+
+```bash
+rm -f stdio.h
+```
+
+Clean old generated files.
+
+```bash
+find . -maxdepth 1 \( -name '*.o' -o -name '*.atac' -o -name 'wordcount.trace' -o -name 'wordcount' \) -delete
+```
+
+Build the normal tutorial program.
+
+```bash
+make \
+CC="clang -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion" \
+CFLAGS="-I. -O2"
+```
+
+Run the baseline checks.
+
+```bash
+./wordcount input1
+./wordcount -lwc input1
+```
+
+This confirms that the tutorial program itself works normally before ATAC instrumentation.
+
+---
+
+## Step 10: Add a Local `stdio.h` Shim for ATAC Instrumentation Only
+
+ATAC’s old parser cannot handle modern macOS SDK headers cleanly. For the tutorial instrumentation step, add a small local `stdio.h` file in the tutorial directory.
+
+Use this shim only for the ATAC build, not for the normal baseline build.
+
+Create this file.
+
+```text
+stdio.h
+```
+
+Add this content.
+
+```c
+#ifndef ATAC_TUTORIAL_STDIO_H
+#define ATAC_TUTORIAL_STDIO_H
+
+#define EOF (-1)
+#define NULL ((void *)0)
+
+typedef struct __sFILE FILE;
+
+extern FILE *fopen();
+extern int fclose();
+extern int getc();
+extern int fgetc();
+extern int printf();
+extern int fprintf();
+extern int fputs();
+extern int puts();
+
+extern FILE *__stdinp;
+extern FILE *__stdoutp;
+extern FILE *__stderrp;
+
+#define stdin  __stdinp
+#define stdout __stdoutp
+#define stderr __stderrp
+
+#endif
+```
+
+This keeps the ATAC parser away from the full Apple SDK header tree.
+
+---
+
+## Step 11: Build the Tutorial with `atacCC`
+
+Clean the tutorial directory.
+
+```bash
+find . -maxdepth 1 \( -name '*.o' -o -name '*.atac' -o -name 'wordcount.trace' -o -name 'wordcount' \) -delete
+```
+
+Build with ATAC instrumentation.
+
+```bash
+make \
+CC=atacCC \
+CFLAGS="-I. -O2 -std=gnu89 -Wno-implicit-function-declaration -Wno-implicit-int -Wno-return-type -Wno-int-conversion"
+```
+
+Verify that the expected files were created.
+
+```bash
+ls -l main.atac wc.atac main.o wc.o wordcount
+```
+
+---
+
+## Step 12: Run the Instrumented Program
+
+Run the first tutorial tests.
+
+```bash
+./wordcount input1
+./wordcount -lwc input1
+```
+
+Check that a trace file was created.
+
+```bash
+ls -l wordcount.trace
+head -20 wordcount.trace
+```
+
+Generate the first coverage summary.
+
+```bash
+atac -s -f wordcount.trace main.atac wc.atac
+```
+
+A successful summary has rows for these functions.
+
+```text
+main
+print
+count
+== total ==
+```
+
+An observed macOS result after the first basic tests was this.
+
+```text
+% blocks      % decisions   % C-Uses      % P-Uses      function
+------------- ------------- ------------- ------------- ------------- 
+74(23/31)     65(11/17)     58(38/66)     60(6/10)      main
+100(8)        50(3/6)       100(4)        50(3/6)       print
+100(14)       100(12)       75(12/16)     93(14/15)     count
+85(45/53)     74(26/35)     63(54/86)     74(23/31)     == total ==
+```
+
+---
+
+## Step 13: Continue the ATAC Tutorial Tests
+
+Run more tutorial-style tests.
+
+```bash
+./wordcount -x
+./wordcount nosuchfile
+./wordcount input1 input2
+```
+
+The invalid option test should print this.
+
+```text
+invalid option: -x
+usage: wc [-lwc] [files]
+```
+
+The missing file test should print this.
+
+```text
+nosuchfile: No such file or directory
+```
+
+Then rerun coverage.
+
+```bash
+atac -s -f wordcount.trace main.atac wc.atac
+```
+
+After several tests, one observed coverage summary was this.
+
+```text
+% blocks      % decisions   % C-Uses      % P-Uses      function
+------------- ------------- ------------- ------------- ------------- 
+100(31)       94(16/17)     77(51/66)     100(10)       main
+100(8)        50(3/6)       100(4)        50(3/6)       print
+100(14)       100(12)       81(13/16)     93(14/15)     count
+100(53)       89(31/35)     79(68/86)     87(27/31)     == total ==
+```
+
+This confirms that the ATAC trace and coverage workflow works on macOS after the compatibility patches.
+
+---
+
+## Current macOS Status
+
+Validated items:
+
+- ATAC builds on macOS and Apple Silicon inside a case-sensitive APFS workspace.
+- `make LIB` and `make BIN` complete with a local install prefix.
+- `atac`, `atacCC`, and `ataclib` are available from `_install/bin`.
+- The tutorial can be built normally with Clang compatibility flags.
+- The tutorial can be instrumented with `atacCC`.
+- `main.atac`, `wc.atac`, `wordcount.trace`, and coverage summaries are generated.
+
+Remaining limitation:
+
+The ATAC-instrumented `wordcount` binary can still print incorrect wordcount values in some macOS arm64 runs, especially around `stdin` or repeated tutorial tests. The baseline non-instrumented binary prints correct values.
+
+So, the macOS coverage workflow is validated, but full semantic equivalence of the instrumented executable output is not fully resolved yet.
+
+---
+
+## Correct Use of `atac -f`
+
+This ATAC version does not accept this command.
+
+```bash
+atac -f wordcount.trace main.atac wc.atac
+```
+
+The `-f` option is valid with summary mode.
+
+```bash
+atac -s -f wordcount.trace main.atac wc.atac
+```
+
+For the plain interactive-style command, pass the trace file as a normal file.
+
+```bash
+atac wordcount.trace main.atac wc.atac
+```
+
+Or run ATAC without explicitly passing the trace file.
+
+```bash
+atac main.atac wc.atac
+```
+
+Use the first form when you want to include `wordcount.trace` explicitly. Use the second form when the tool can infer or interactively load the needed coverage data.
+
+---
+
+## Common macOS Failure Points
+
+### `yylex` or `yyerror` undeclared in `Pgram.c`
+
+This means the parser file is being compiled without the GNU89 compatibility flags.
+
+Do not run plain `make`.
+
+Use the full macOS build command from Step 6.
+
+---
+
+### `BITS_PER_UNIT` or `HOST_BITS_PER_LONG` undeclared
+
+Use these definitions in `CFLAGS`.
+
+```bash
+-DBITS_PER_UNIT=8
+-DBITS_PER_WORD=64
+-DHOST_BITS_PER_INT=32
+-DHOST_BITS_PER_LONG=64
+```
+
+---
+
+### `cpp_ansi.c` fails on `main()`
+
+Patch `makefile` and `makefile.in` manually as described in Step 3.
+
+The Makefile must generate this line.
+
+```c
+int main(void){return *(m(x))=='x';}
+```
+
+It must not generate this old form.
+
+```c
+main(){return *(m(x))=='x';}
+```
+
+---
+
+### `stdio.h: No such file or directory` or Apple SDK parse errors during `atacCC`
+
+Use the local tutorial-only `stdio.h` shim from Step 10.
+
+Do not use the shim for the normal baseline build.
+
+---
+
+### Instrumented binary crashes inside `aTaC`
+
+Patch `tools/atac_rt.c` so that `aTaC` receives `blk` as `long`, not `int`.
+
+This avoids truncating a 64-bit pointer on Apple Silicon.
+
+---
+
+### Huge wrong numbers such as `8589934593`
+
+Patch `tutorial/main.c` so that the counter print statements use `%7d`, not `%7ld`.
+
+The variables are `int`.
+
+---
+
+### `atac -f wordcount.trace main.atac wc.atac` reports incompatible flags
+
+Use summary mode.
+
+```bash
+atac -s -f wordcount.trace main.atac wc.atac
+```
+
+Or pass the trace file as a normal file.
+
+```bash
+atac wordcount.trace main.atac wc.atac
+```
+
+---
+
+## Manual Editing Summary
+
+The required edits are small and should be done manually.
+
+1. Create a case-sensitive APFS workspace before cloning the repository.
+2. Patch `makefile.in` and, after configuration, the generated `makefile`.
+3. Configure with a local install prefix and macOS-compatible compiler flags.
+4. Patch `tools/atac_rt.c` so the runtime does not truncate a 64-bit pointer.
+5. Build ATAC using the full macOS `make` command, not plain `make`.
+6. Install the local runtime layout with `make LIB` and `make BIN`.
+7. Patch `tutorial/main.c` by adding the forward declaration for `print()`.
+8. Patch the three tutorial counter format strings from `%7ld` to `%7d`.
+9. Build the tutorial normally first, without the `stdio.h` shim.
+10. Add the local `stdio.h` shim only before using `atacCC`.
+11. Build the tutorial with `atacCC`.
+12. Run the tutorial tests and generate coverage using `atac -s -f wordcount.trace main.atac wc.atac`.
+
+These steps keep the build reproducible and avoid automatic source rewrites. Each change is small enough to review directly in the affected file.
