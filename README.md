@@ -342,7 +342,7 @@ printf(" %7ld", wordct);
 printf(" %7ld", charct);
 ```
 
-Change them to this.
+Change them to this, if not done already
 
 ```c
 printf(" %7d", linect);
@@ -392,7 +392,7 @@ This confirms that the tutorial program itself works normally before ATAC instru
 ## Step 10: Add a Local `stdio.h` Shim for ATAC Instrumentation Only
 
 ATAC’s old parser cannot handle modern macOS SDK headers cleanly. For the tutorial instrumentation step, add a small local `stdio.h` file in the tutorial directory.
-
+https://stackoverflow.com/questions/52797686/compiling-through-macos-terminal-fatal-error-stdio-h-no-such-file-or-director
 Use this shim only for the ATAC build, not for the normal baseline build.
 
 Create this file.
@@ -444,7 +444,7 @@ Clean the tutorial directory.
 find . -maxdepth 1 \( -name '*.o' -o -name '*.atac' -o -name 'wordcount.trace' -o -name 'wordcount' \) -delete
 ```
 
-Build with ATAC instrumentation.
+Build with ATAC instrumentation following the tutoral document
 
 ```bash
 make \
