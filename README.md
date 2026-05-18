@@ -8,7 +8,7 @@ The original ATAC project is maintained at:
 https://invisible-island.net/atac/
 
 The most important point is that the repository must be cloned inside a case-sensitive filesystem. ATAC contains files whose names differ only by case, such as `VERSION` and `version`. On the default macOS filesystem, these names can collide and damage the source tree before the build even starts.
-
+- https://stackoverflow.com/questions/25575463/git-macos-case-sensitive-overwrite-issues
 ---
 
 ## Source
