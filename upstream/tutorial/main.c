@@ -1,3 +1,5 @@
+static int print();
+
 #include <stdio.h>
 
 main(argc,argv)
@@ -69,10 +71,10 @@ static print(doline, doword, dochar, linect, wordct, charct, file)
 	char	*file;    
 {
 	if (doline)
-		printf(" %7ld", linect);
+		printf(" %7d", linect);
 	if (doword)
-		printf(" %7ld", wordct);
+		printf(" %7d", wordct);
 	if (dochar)
-		printf(" %7ld", charct);
+		printf(" %7d", charct);
 	printf(" %s\n", file);
 }
