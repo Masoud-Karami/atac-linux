@@ -10,7 +10,7 @@ https://invisible-island.net/atac/
 The most important point is that the repository must be cloned inside a case-sensitive filesystem. ATAC contains files whose names differ only by case, such as `VERSION` and `version`. On the default macOS filesystem, these names can collide and damage the source tree before the build even starts.
 - https://stackoverflow.com/questions/25575463/git-macos-case-sensitive-overwrite-issues
 
-You can also create a case-sensitive APFS volume through Disk Utility, but the terminal method in the following is easier to reproduce.
+You can also create a case-sensitive APFS volume through Disk Utility, but the terminal method in the following is easier to reproduce. Note that images created with hdiutil create -type SPARSE are permanent files, but they do not stay mounted automatically after a system restart; The file still exists, and the .sparseimage file you created is still on your hard drive. The point after a restart is that the disk is unmounted.
 
 Apple Disk Utility reference:
 https://support.apple.com/en-ca/guide/disk-utility/dskua9e6a110/mac
